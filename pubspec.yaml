@@ -1,0 +1,51 @@
+name: washnfold
+description: WashNFold — Laundry shop management system (order intake, queue, POS, owner dashboard).
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+  flutter: '>=3.19.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+
+  # Backend
+  supabase_flutter: ^2.5.0
+
+  # Routing (needed for the public /track/:orderId customer link)
+  go_router: ^14.2.0
+
+  # QR codes for the customer tracking link
+  qr_flutter: ^4.1.0
+
+  # State management
+  provider: ^6.1.2
+
+  # Opens the privacy policy page in the browser
+  url_launcher: ^6.3.0
+
+  # Utilities
+  intl: ^0.19.0
+  uuid: ^4.4.0
+  collection: ^1.18.0
+
+  # "Machine finished" chime (plays assets/sounds/finished.wav)
+  audioplayers: ^6.1.0
+
+  # Remembers the chime on/off choice on this device
+  shared_preferences: ^2.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/sounds/finished.wav

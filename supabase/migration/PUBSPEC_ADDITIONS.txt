@@ -1,0 +1,12 @@
+Add to pubspec.yaml (merge into your existing dependencies / flutter sections):
+
+dependencies:
+  audioplayers: ^6.1.0
+  shared_preferences: ^2.3.0
+
+flutter:
+  assets:
+    - assets/sounds/finished.wav
+
+Then run: flutter pub get
+(The chime file is assets/sounds/finished.wav, at the project root next to lib/.)
