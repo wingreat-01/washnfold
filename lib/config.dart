@@ -16,10 +16,10 @@ class AppConfig {
   /// The public URL this web app is deployed at, used to build the
   /// customer-facing tracking links encoded in each order's QR code.
   /// Pass your real domain once deployed:
-  ///   --dart-define=WEB_BASE_URL=https://washnfold.app
+  ///   --dart-define=WEB_BASE_URL=https://wnf.prohubapps.com
   static const webBaseUrl = String.fromEnvironment(
     'WEB_BASE_URL',
-    defaultValue: 'https://washnfold.app',
+    defaultValue: 'https://wnf.prohubapps.com',
   );
 
   /// Public privacy policy page (served from web/privacy/index.html).

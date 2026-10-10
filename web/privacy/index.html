@@ -4,133 +4,182 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#1769e0">
-  <meta name="description" content="How WashNFold collects, uses, stores and deletes information.">
-  <title>Privacy Policy | WashNFold</title>
-  <!-- BEFORE PUBLISHING: replace the two highlighted placeholders
-       (developer/business name and contact email), then re-read the policy
-       to make sure it still matches what your app does. -->
+  <meta name="description" content="Permanently delete your WashNFold account and its data.">
+  <title>Delete Your Account | WashNFold</title>
   <style>
-    :root { color-scheme: light; --blue:#1769e0; --ink:#172033; --muted:#657086; --line:#e1e7f0; --bg:#f4f7fb; }
+    :root { color-scheme: light; --blue:#1769e0; --red:#c62828; --ink:#172033; --muted:#657086; --line:#e1e7f0; --bg:#f4f7fb; }
     * { box-sizing:border-box; }
-    body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; color:var(--ink); background:linear-gradient(180deg,#eaf2ff 0,#f7f9fc 280px,var(--bg) 100%); display:flex; justify-content:center; padding:28px 14px 40px; line-height:1.6; }
-    main { width:100%; max-width:760px; }
-    header { text-align:center; margin:8px 0 22px; }
-    .logo { width:58px;height:58px;margin:0 auto 10px;border-radius:18px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:28px;box-shadow:0 8px 22px #1769e033; }
-    h1 { margin:0;font-size:28px;letter-spacing:-.5px; }
-    .updated { color:var(--muted);font-size:14px;margin:7px 0 0; }
-    article { background:#fff;border:1px solid var(--line);border-radius:22px;padding:26px 24px;box-shadow:0 12px 35px #22395a0a; }
-    h2 { font-size:18px;margin:28px 0 8px;letter-spacing:-.2px; }
-    h2:first-of-type { margin-top:0; }
-    p, li { font-size:15px;color:#33405a; }
-    p { margin:0 0 12px; }
-    ul { margin:0 0 12px;padding-left:22px; }
-    li { margin:0 0 6px; }
-    a { color:var(--blue); }
-    .todo { background:#fff3bf;border-radius:4px;padding:0 4px;font-weight:600; }
-    table { width:100%;border-collapse:collapse;font-size:14px;margin:0 0 12px; }
-    th, td { text-align:left;vertical-align:top;border-bottom:1px solid var(--line);padding:9px 8px; }
-    th { color:var(--muted);font-weight:650;font-size:13px; }
-    .scroll { overflow-x:auto; }
-    footer { color:var(--muted);text-align:center;font-size:12px;padding:18px 10px 0; }
-    @media (max-width:420px) { article { padding:20px 16px; } h1 { font-size:24px; } }
+    body { margin:0; min-height:100vh; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; color:var(--ink); background:linear-gradient(180deg,#eaf2ff 0,#f7f9fc 280px,var(--bg) 100%); display:flex; justify-content:center; padding:28px 14px; }
+    main { width:100%; max-width:520px; }
+    .brand { text-align:center; margin:8px 0 22px; }
+    .logo { width:58px;height:58px;margin:0 auto 10px;border-radius:18px;background:var(--blue);color:white;display:grid;place-items:center;font-size:28px;box-shadow:0 8px 22px #1769e033; }
+    h1 { margin:0;font-size:25px;letter-spacing:-.5px; }
+    h2 { font-size:15px;margin:0 0 8px; }
+    .sub { color:var(--muted);font-size:14px;margin:7px 0 0; }
+    .card { background:white;border:1px solid var(--line);border-radius:22px;padding:23px;box-shadow:0 12px 35px #22395a0a;margin:0 0 16px; }
+    .info p, .info li { font-size:14px;line-height:1.55;color:#33405a; }
+    .info p { margin:0 0 10px; }
+    .info ul { margin:0 0 12px;padding-left:20px; }
+    label { display:block;font-weight:650;font-size:14px;margin:0 0 8px; }
+    input[type=email], input[type=password], input[type=text] { width:100%;font:inherit;font-size:16px;padding:14px;border:1px solid #cfd8e6;border-radius:12px;outline:none;background:#fff; }
+    input:focus { border-color:var(--blue);box-shadow:0 0 0 3px #1769e01b; }
+    .field { margin:0 0 16px; }
+    button { width:100%;border:0;border-radius:12px;padding:14px 16px;font:inherit;font-weight:700;background:var(--blue);color:white;cursor:pointer; }
+    button.danger { background:var(--red); }
+    button.link { background:none;color:var(--muted);font-weight:600;padding:12px 0 0;font-size:14px; }
+    button:disabled { opacity:.5;cursor:not-allowed; }
+    .hint { color:var(--muted);font-size:12px;line-height:1.5;margin:8px 0 0; }
+    .message { margin-top:16px;padding:12px 13px;border-radius:12px;font-size:14px;line-height:1.5;display:none;overflow-wrap:anywhere; }
+    .message.error { display:block;background:#fff0f0;color:#9b2020;border:1px solid #ffd5d5; }
+    .message.ok { display:block;background:#effaf4;color:#17653f;border:1px solid #cdeedb; }
+    .who { font-size:14px;margin:0 0 14px;padding:10px 12px;background:#f4f7fb;border-radius:12px;overflow-wrap:anywhere; }
+    .warn { font-size:14px;line-height:1.55;color:#7a1c1c;background:#fff0f0;border:1px solid #ffd5d5;border-radius:12px;padding:12px 13px;margin:0 0 16px; }
+    .hidden { display:none !important; }
+    footer { color:var(--muted);text-align:center;font-size:12px;line-height:1.6;padding:10px; }
+    footer a { color:inherit; }
   </style>
 </head>
 <body>
 <main>
-  <header>
+  <header class="brand">
     <div class="logo" aria-hidden="true">◉</div>
-    <h1>Privacy Policy</h1>
-    <p class="updated">WashNFold &middot; Last updated: October 9, 2026</p>
+    <h1>Delete your WashNFold account</h1>
+    <p class="sub">Sign in to confirm it's you, then permanently delete your account.</p>
   </header>
 
-  <article>
-    <h2>1. Who we are</h2>
-    <p>WashNFold is a laundry shop management app (Android app and web app) used by shop owners and their staff to take orders, run the queue, track washers and dryers, and see sales. It is provided by <span class="todo">[YOUR NAME / BUSINESS NAME]</span> ("we", "us"). You can reach us at <span class="todo">[YOUR CONTACT EMAIL]</span>.</p>
-    <p>This policy explains what information the app handles, why, who it is shared with, and how you can delete it.</p>
-
-    <h2>2. Information we handle</h2>
-    <div class="scroll">
-    <table>
-      <thead><tr><th>Whose</th><th>What</th><th>Why</th></tr></thead>
-      <tbody>
-        <tr>
-          <td>Shop owners and staff</td>
-          <td>Email address and password (stored as a secure hash, we never see your password), your name, and your role (owner or attendant).</td>
-          <td>To create your account, sign you in, and decide what you can see.</td>
-        </tr>
-        <tr>
-          <td>The shop</td>
-          <td>Shop name, services and prices, washers and dryers and their timers, inventory, and expenses.</td>
-          <td>To run the shop in the app and show reports to the owner.</td>
-        </tr>
-        <tr>
-          <td>The shop's customers (entered by the shop)</td>
-          <td>Customer name, optional phone number, loyalty points, and their orders: items, totals, status, dates, payment method and amount, and a tracking reference.</td>
-          <td>To process and track laundry orders and let customers check their order status.</td>
-        </tr>
-        <tr>
-          <td>Your device</td>
-          <td>Small settings such as the finish-chime on/off choice and how many machine tiles to show per row, stored on your own device.</td>
-          <td>To remember your preferences.</td>
-        </tr>
-      </tbody>
-    </table>
-    </div>
-    <p>We do <strong>not</strong> collect your location, contacts, photos, microphone or camera data, and the app does not contain advertising or third-party analytics or tracking tools.</p>
-
-    <h2>3. Customer order tracking page</h2>
-    <p>A shop can show a QR code that opens a public tracking page. Customers type the reference printed on their receipt and see only the shop name, the order's current status (such as Washing or Ready) and its basic dates. Customers do not need an account and are not asked for personal details on that page. As with any website, our hosting providers may keep standard technical logs such as IP address and browser type.</p>
-
-    <h2>4. How we use information</h2>
+  <section class="card info" aria-label="What gets deleted">
+    <h2>What happens when you delete</h2>
+    <p><strong>Shop owners:</strong> your login <em>and your entire shop</em> are deleted, including:</p>
     <ul>
-      <li>To provide, secure and support the app.</li>
-      <li>To let owners manage their shop, staff and reports.</li>
-      <li>To let customers check their own order status.</li>
-      <li>To send you account-related messages, such as password reset.</li>
+      <li>orders, payments and customer records</li>
+      <li>services and prices, machines, inventory and expenses</li>
+      <li>all attendant (staff) accounts you created</li>
     </ul>
-    <p>We do not sell your information and we do not use it for advertising.</p>
+    <p>Customer tracking links and QR codes for your shop stop working.</p>
+    <p><strong>Attendants:</strong> only your own login is deleted. Your shop and its orders stay with the owner.</p>
+    <p>Deletion is immediate and <strong>cannot be undone</strong>.</p>
+  </section>
 
-    <h2>5. Shop owners and their customers' data</h2>
-    <p>Customer names, phone numbers and orders are entered by the shop and belong to that shop. Shop owners decide what to collect from their own customers and are responsible for using it lawfully. We process that data only to provide the app to the shop. If you are a customer and want your details corrected or removed, please ask the laundry shop directly.</p>
+  <section class="card" aria-label="Delete account">
+    <!-- Step 1: sign in -->
+    <form id="signin-form">
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password" required>
+      </div>
+      <button id="signin-button" type="submit">Sign in to continue</button>
+    </form>
 
-    <h2>6. Who we share information with</h2>
-    <p>We use service providers to run the app. They process data on our behalf and only to provide their service:</p>
-    <ul>
-      <li><strong>Supabase</strong>: database, sign-in, and server functions.</li>
-      <li><strong>Vercel</strong>: hosting of the web app and the public pages.</li>
-    </ul>
-    <p>Within a shop, owners can see everything for their shop, while attendants see only what the app allows them to use. We may also disclose information if required by law.</p>
+    <!-- Step 2: confirm -->
+    <form id="delete-form" class="hidden">
+      <p class="who" id="who"></p>
+      <p class="warn" id="warn"></p>
+      <div class="field">
+        <label for="confirm">Type DELETE to confirm</label>
+        <input id="confirm" type="text" autocomplete="off" autocapitalize="characters" placeholder="DELETE">
+      </div>
+      <button id="delete-button" class="danger" type="submit" disabled>Permanently delete my account</button>
+      <button id="cancel-button" class="link" type="button">Cancel and sign out</button>
+    </form>
 
-    <h2>7. How long we keep it</h2>
-    <p>We keep your information while your account is active. When an account is deleted (see below), the data described there is removed. Copies held in our providers' backups may remain for a short time before they are overwritten.</p>
+    <div id="message" class="message" role="status" aria-live="polite"></div>
+  </section>
 
-    <h2>8. Deleting your account and data</h2>
-    <p>You can delete your account at any time:</p>
-    <ul>
-      <li><strong>In the app:</strong> Settings &rarr; Delete account.</li>
-      <li><strong>On the web:</strong> <a href="/delete-account">washnfold.app/delete-account</a></li>
-    </ul>
-    <p><strong>Shop owners:</strong> deleting your account permanently deletes your login and your whole shop: orders, customers, services, machines, inventory, expenses, and all staff accounts you created.</p>
-    <p><strong>Attendants:</strong> deleting your account removes your login. Your shop and its orders remain with the owner; your name may remain on past orders as a record of who handled them.</p>
-    <p>Deletion is permanent and cannot be undone. If you cannot sign in, email us at <span class="todo">[YOUR CONTACT EMAIL]</span> from the address on the account.</p>
-
-    <h2>9. Security</h2>
-    <p>Data is sent over encrypted connections (HTTPS). Passwords are stored hashed, and the database restricts each account to its own shop's data. No system is perfectly secure, so please use a strong, unique password and keep it private.</p>
-
-    <h2>10. Children</h2>
-    <p>WashNFold is a business tool for shop owners and staff. It is not directed at children, and we do not knowingly collect information from children.</p>
-
-    <h2>11. Your choices</h2>
-    <p>You can ask us to access or correct the information tied to your account, or delete it, using the contact above or the deletion options in section 8.</p>
-
-    <h2>12. Changes to this policy</h2>
-    <p>We may update this policy as the app changes. When we do, we will change the "Last updated" date at the top of this page.</p>
-
-    <h2>13. Contact</h2>
-    <p>Questions about this policy or your data: <span class="todo">[YOUR CONTACT EMAIL]</span>.</p>
-  </article>
-
-  <footer>&copy; WashNFold</footer>
+  <footer id="footer">
+    Deleting from inside the app: <strong>Settings → Delete account</strong>.
+    <span id="support" class="hidden"><br>Can't sign in? Email <a id="support-link" href="#"></a> from the address on your account and ask us to delete it.</span>
+  </footer>
 </main>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+  const SUPABASE_URL = 'https://dietefbjoywhmebwzhww.supabase.co';
+  // Public anon key only. Never put a service_role key in this page.
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZXRlZmJqb3l3aG1lYnd6aHd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNzE3NjAsImV4cCI6MjEwNjg0Nzc2MH0.HgVdhqoifW0nJs9jdLkspT4gfggrkmCzJazy71LSouY';
+  // Support address, shown for people who cannot sign in.
+  const SUPPORT_EMAIL = 'wnf@prohubapps.com';
+
+  const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false }
+  });
+
+  const $ = (s) => document.querySelector(s);
+  const signinForm = $('#signin-form'), deleteForm = $('#delete-form');
+  const signinBtn = $('#signin-button'), deleteBtn = $('#delete-button');
+  const confirmInput = $('#confirm'), message = $('#message');
+
+  if (SUPPORT_EMAIL) {
+    $('#support').classList.remove('hidden');
+    $('#support-link').textContent = SUPPORT_EMAIL;
+    $('#support-link').href = 'mailto:' + SUPPORT_EMAIL + '?subject=WashNFold%20account%20deletion';
+  }
+
+  signinForm.addEventListener('submit', async (e) => {
+    e.preventDefault(); clearMessage();
+    signinBtn.disabled = true; signinBtn.textContent = 'Signing in…';
+    try {
+      const { data, error } = await client.auth.signInWithPassword({
+        email: $('#email').value.trim(), password: $('#password').value
+      });
+      if (error) throw error;
+      let role = null;
+      try {
+        const { data: row } = await client.from('staff').select('role').eq('user_id', data.user.id).maybeSingle();
+        role = row?.role ?? null;
+      } catch (_) { /* fall back to the generic warning */ }
+      $('#who').textContent = 'Signed in as ' + data.user.email;
+      $('#warn').textContent = role === 'owner'
+        ? 'You are the shop owner. Your shop, all orders, customers, machines, expenses and every staff account will be permanently deleted.'
+        : role === 'attendant'
+          ? 'Your login will be permanently deleted. The shop and its orders are not affected.'
+          : 'Your login and any data linked to it will be permanently deleted.';
+      $('#password').value = '';
+      signinForm.classList.add('hidden'); deleteForm.classList.remove('hidden');
+      confirmInput.focus();
+    } catch (err) {
+      showMessage('Wrong email or password. Please try again.', 'error');
+    } finally {
+      signinBtn.disabled = false; signinBtn.textContent = 'Sign in to continue';
+    }
+  });
+
+  confirmInput.addEventListener('input', () => {
+    deleteBtn.disabled = confirmInput.value.trim().toUpperCase() !== 'DELETE';
+  });
+
+  $('#cancel-button').addEventListener('click', async () => {
+    await client.auth.signOut();
+    confirmInput.value = ''; deleteBtn.disabled = true; clearMessage();
+    deleteForm.classList.add('hidden'); signinForm.classList.remove('hidden');
+  });
+
+  deleteForm.addEventListener('submit', async (e) => {
+    e.preventDefault(); clearMessage();
+    if (confirmInput.value.trim().toUpperCase() !== 'DELETE') return;
+    deleteBtn.disabled = true; deleteBtn.textContent = 'Deleting…';
+    try {
+      const { error } = await client.functions.invoke('delete-account', { body: { confirm: true } });
+      if (error) {
+        let msg = 'We could not delete the account. Please try again.';
+        try { const j = await error.context.json(); if (j?.error) msg = j.error; } catch (_) {}
+        throw new Error(msg);
+      }
+      try { await client.auth.signOut({ scope: 'local' }); } catch (_) {}
+      deleteForm.classList.add('hidden');
+      showMessage('Your account has been permanently deleted. You can close this page.', 'ok');
+    } catch (err) {
+      showMessage(err.message, 'error');
+      deleteBtn.disabled = false; deleteBtn.textContent = 'Permanently delete my account';
+    }
+  });
+
+  function showMessage(text, type) { message.textContent = text; message.className = 'message ' + type; }
+  function clearMessage() { message.textContent = ''; message.className = 'message'; }
+</script>
 </body>
 </html>
