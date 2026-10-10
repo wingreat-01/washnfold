@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'order_item.dart';
 
 enum OrderStatus {
@@ -77,10 +79,17 @@ enum PaymentStatus { unpaid, paid }
 PaymentStatus paymentStatusFromString(String value) =>
     value == 'paid' ? PaymentStatus.paid : PaymentStatus.unpaid;
 
-String _makePublicReference(String id) {
-  final compact = id.replaceAll('-', '').toUpperCase();
-  final length = compact.length < 10 ? compact.length : 10;
-  return 'WF-${compact.substring(0, length)}';
+/// Short receipt reference such as "WF-8FEC9X" (9 characters including the dash).
+/// Uses an alphabet without look-alike characters (no 0/O, 1/I/L).
+const _refAlphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+final _refRandom = Random.secure();
+
+String generatePublicReference() {
+  final code = List.generate(
+    6,
+    (_) => _refAlphabet[_refRandom.nextInt(_refAlphabet.length)],
+  ).join();
+  return 'WF-$code';
 }
 
 class Order {
@@ -122,7 +131,7 @@ class Order {
     required this.createdAt,
     this.readyAt,
     this.pickedUpAt,
-  }) : publicReference = publicReference ?? _makePublicReference(id);
+  }) : publicReference = publicReference ?? generatePublicReference();
 
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(

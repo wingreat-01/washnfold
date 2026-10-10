@@ -107,7 +107,7 @@ class _CustomerTrackingLookupScreenState
                         onSubmitted: (_) => _loading ? null : _track(),
                         decoration: const InputDecoration(
                           labelText: 'Order reference number',
-                          hintText: 'e.g. WF-AB12CD34',
+                          hintText: 'e.g. WF-8FEC9X',
                           prefixIcon: Icon(Icons.receipt_long_outlined),
                           border: OutlineInputBorder(),
                         ),

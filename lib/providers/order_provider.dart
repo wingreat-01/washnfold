@@ -129,21 +129,34 @@ class OrderProvider extends ChangeNotifier {
     final itemsTotal = lineItems.fold<double>(0, (sum, i) => sum + i.subtotal);
     final total = itemsTotal + (isRush ? rushSurcharge : 0);
 
-    final order = Order(
-      id: orderId,
-      shopId: shopId,
-      customerId: customerId,
-      customerName: customerName,
-      staffId: staffId,
-      status: OrderStatus.received,
-      isRush: isRush,
-      rushSurcharge: isRush ? rushSurcharge : 0,
-      total: total,
-      items: lineItems,
-      createdAt: DateTime.now(),
-    );
-
-    await _supabase.client.from('orders').insert(order.toJson());
+    // The 9-character reference (e.g. WF-8FEC9X) is random, so on the rare
+    // chance it already exists in this shop, retry with a fresh one.
+    late Order order;
+    for (var attempt = 0;; attempt++) {
+      order = Order(
+        id: orderId,
+        publicReference: generatePublicReference(),
+        shopId: shopId,
+        customerId: customerId,
+        customerName: customerName,
+        staffId: staffId,
+        status: OrderStatus.received,
+        isRush: isRush,
+        rushSurcharge: isRush ? rushSurcharge : 0,
+        total: total,
+        items: lineItems,
+        createdAt: DateTime.now(),
+      );
+      try {
+        await _supabase.client.from('orders').insert(order.toJson());
+        break;
+      } catch (e) {
+        final text = e.toString();
+        final isRefClash = text.contains('23505') &&
+            text.contains('public_reference');
+        if (!isRefClash || attempt >= 7) rethrow;
+      }
+    }
     try {
       await _supabase.client.from('order_items').insert(
             lineItems
