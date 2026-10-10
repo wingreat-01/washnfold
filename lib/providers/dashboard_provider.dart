@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import '../models/order.dart';
 import '../services/supabase_service.dart';
+import '../utils/app_errors.dart';
 
 /// Computes the owner-facing daily/weekly/monthly numbers. Deliberately
 /// simple for MVP — pulls orders in range and aggregates client-side rather
@@ -39,12 +40,12 @@ class DashboardProvider extends ChangeNotifier {
           .listen(
         (_) => refresh(),
         onError: (Object error, StackTrace stackTrace) {
-          debugPrint('dashboard realtime subscription failed: $error');
+          logDebug('dashboard realtime subscription failed: $error');
           // The periodic fallback remains active if the Realtime stream fails.
         },
       );
     } catch (e) {
-      debugPrint('dashboard realtime setup failed: $e');
+      logDebug('dashboard realtime setup failed: $e');
     }
   }
 
@@ -112,9 +113,9 @@ class DashboardProvider extends ChangeNotifier {
     _lastUpdatedAt = DateTime.now();
 
     } catch (e, stackTrace) {
-      _errorMessage = e.toString();
-      debugPrint('dashboard refresh failed: $e');
-      debugPrintStack(stackTrace: stackTrace);
+      _errorMessage = friendlyError(e, fallback: "Couldn't load the dashboard. Please try again.");
+      logDebug('dashboard refresh failed: $e');
+      logStack(stackTrace);
     } finally {
       _loading = false;
       if (!_disposed) notifyListeners();

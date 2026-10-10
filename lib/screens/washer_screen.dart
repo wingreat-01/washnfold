@@ -14,6 +14,7 @@ import '../widgets/dryer_picker.dart';
 import '../widgets/machine_alert_host.dart';
 import '../widgets/machine_timer.dart';
 import '../widgets/tile_columns_menu.dart';
+import '../utils/app_errors.dart';
 
 const _availableColor = Color(0xFF2F9E5B);
 const _inUseColor = Color(0xFFD32F2F); // red = busy
@@ -105,7 +106,7 @@ class _WasherScreenState extends State<WasherScreen> {
     try {
       await provider.setEndsAt(washer.id, newEnd);
     } catch (e) {
-      _snack('Could not update the timer: $e');
+      _snack(friendlyError(e, fallback: 'Could not update the timer.'));
     }
   }
 
@@ -140,8 +141,8 @@ class _WasherScreenState extends State<WasherScreen> {
       // No payment dialog here: this order was waiting in the queue, so it
       // is paid after all services are finished (Ready → Picked up).
     } catch (e) {
-      debugPrint('assign failed: $e');
-      _snack(e is StateError ? e.message : 'Could not assign: $e');
+      logDebug('assign failed: $e');
+      _snack(friendlyError(e, fallback: 'Could not assign. Please try again.'));
     }
   }
 
@@ -187,7 +188,7 @@ class _WasherScreenState extends State<WasherScreen> {
         _snack('${customer ?? 'Order'} is ready for pickup');
       }
     } catch (e) {
-      _snack('Could not release: $e');
+      _snack(friendlyError(e, fallback: 'Could not release. Please try again.'));
     }
   }
 
@@ -210,8 +211,8 @@ class _WasherScreenState extends State<WasherScreen> {
       // Guarded: throws if someone else took that dryer a moment ago.
       await dryers.assignOrder(picked.id, order.id);
     } catch (e) {
-      debugPrint('assign dryer failed: $e');
-      _snack(e is StateError ? e.message : 'Could not assign dryer: $e');
+      logDebug('assign dryer failed: $e');
+      _snack(friendlyError(e, fallback: 'Could not assign the dryer. Please try again.'));
       return;
     }
 
@@ -220,12 +221,12 @@ class _WasherScreenState extends State<WasherScreen> {
       await orders.advanceStatus(order.id, OrderStatus.drying);
       _snack('${order.customerName} → ${picked.name}');
     } catch (e) {
-      debugPrint('dry hand-off failed: $e');
+      logDebug('dry hand-off failed: $e');
       // Don't leave the load in two machines: undo the dryer assignment.
       try {
         await dryers.release(picked.id);
       } catch (_) {}
-      _snack('Could not move the load to the dryer: $e');
+      _snack(friendlyError(e, fallback: 'Could not move the load to the dryer.'));
     }
   }
 
@@ -960,11 +961,11 @@ class _WasherFormState extends State<_WasherForm> {
       }
       nav.pop();
     } catch (e) {
-      debugPrint('save washer failed: $e');
+      logDebug('save washer failed: $e');
       if (mounted) {
         setState(() {
           _saving = false;
-          _error = 'Could not save: $e';
+          _error = friendlyError(e, fallback: 'Could not save. Please try again.');
         });
       }
     }
@@ -993,7 +994,7 @@ class _WasherFormState extends State<_WasherForm> {
       await provider.deleteWasher(widget.existing!.id);
       nav.pop();
     } catch (e) {
-      if (mounted) setState(() => _error = 'Could not delete: $e');
+      if (mounted) setState(() => _error = friendlyError(e, fallback: 'Could not delete. Please try again.'));
     }
   }
 

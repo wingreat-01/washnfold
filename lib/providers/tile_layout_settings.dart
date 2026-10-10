@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../utils/app_errors.dart';
 
 /// Device-level preference: how many machine tiles to show per row on a
 /// phone-sized screen, separately for the Washers and Dryers tabs.
@@ -23,7 +24,7 @@ class TileLayoutSettings extends ChangeNotifier {
       if (d != null && options.contains(d)) _dryerColumns = d;
       notifyListeners();
     } catch (e) {
-      debugPrint('load tile layout failed: $e');
+      logDebug('load tile layout failed: $e');
     }
   }
 
@@ -46,7 +47,7 @@ class TileLayoutSettings extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt(key, n);
     } catch (e) {
-      debugPrint('save tile layout failed: $e');
+      logDebug('save tile layout failed: $e');
     }
   }
 }

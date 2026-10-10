@@ -7,6 +7,7 @@ import '../config.dart';
 import '../models/washer.dart';
 import '../services/supabase_service.dart';
 import 'waitlist.dart';
+import '../utils/app_errors.dart';
 
 /// Owns the shop's washers. Same realtime pattern as OrderProvider: initial
 /// load, then a Supabase stream so every cashier's screen updates the moment
@@ -99,7 +100,7 @@ class WasherProvider extends ChangeNotifier {
     try {
       await _reload();
     } catch (e) {
-      debugPrint('load washers failed: $e');
+      logDebug('load washers failed: $e');
     } finally {
       _loading = false;
       notifyListeners();
@@ -112,7 +113,7 @@ class WasherProvider extends ChangeNotifier {
         .listen((rows) {
       _applyWashers(_sorted(rows.map(Washer.fromJson).toList()));
       notifyListeners();
-    }, onError: (e) => debugPrint('washer stream error: $e'));
+    }, onError: (e) => logDebug('washer stream error: $e'));
   }
 
   Future<void> _reload() async {

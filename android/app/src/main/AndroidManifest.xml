@@ -1,4 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Needed for release builds to reach Supabase (Flutter only adds it to
+         the debug/profile manifests by default). -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="washnfold"
         android:name="${applicationName}"
@@ -20,9 +23,22 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+            <!-- Google sign-in returns through the deep link below. Supabase
+                 handles it itself, so stop Flutter from also passing it to
+                 the router (which would show a "page not found" screen). -->
+            <meta-data
+              android:name="flutter_deeplinking_enabled"
+              android:value="false" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <!-- Google sign-in callback: io.supabase.washnfold://login-callback -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="io.supabase.washnfold" android:host="login-callback" />
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

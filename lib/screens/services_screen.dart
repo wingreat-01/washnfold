@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../models/service_item.dart';
 import '../providers/service_catalog_provider.dart';
+import '../utils/app_errors.dart';
 
 /// Manage the shop's services — add, edit price, switch on/off, delete.
 /// Works like adding a product in a POS: whatever is active here shows up
@@ -54,7 +55,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
       messenger.showSnackBar(
           SnackBar(content: Text('Deleted "${service.name}".')));
     } catch (e) {
-      debugPrint('delete service failed: $e');
+      logDebug('delete service failed: $e');
       messenger.showSnackBar(const SnackBar(
         content: Text(
             "Can't delete — it's used by past orders. Switch it off instead."),
@@ -104,7 +105,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
                     } catch (e) {
                       if (!mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Could not update: $e')));
+                          SnackBar(content: Text(friendlyError(e, fallback: 'Could not update. Please try again.'))));
                     }
                   },
                 ),
@@ -279,8 +280,8 @@ class _ServiceFormState extends State<_ServiceForm> {
       }
       navigator.pop();
     } catch (e) {
-      debugPrint('save service failed: $e');
-      if (mounted) setState(() => _error = 'Could not save: $e');
+      logDebug('save service failed: $e');
+      if (mounted) setState(() => _error = friendlyError(e, fallback: 'Could not save. Please try again.'));
     } finally {
       if (mounted) setState(() => _saving = false);
     }

@@ -7,6 +7,7 @@ import '../services/supabase_service.dart';
 import 'services_screen.dart';
 import 'staff_screen.dart';
 import '../widgets/privacy_policy_link.dart';
+import '../utils/app_errors.dart';
 
 /// Account settings: who you're signed in as, sign out, and permanent
 /// account deletion (required by Google Play for apps with accounts).
@@ -211,8 +212,11 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
   bool _obscure = true;
   String? _error;
 
+  // Google-only logins have no password, so only ask for one when it exists.
+  final bool _needsPassword = SupabaseService.instance.hasPasswordLogin;
+
   bool get _ready =>
-      _password.text.isNotEmpty &&
+      (!_needsPassword || _password.text.isNotEmpty) &&
       _confirm.text.trim().toUpperCase() == 'DELETE';
 
   @override
@@ -228,12 +232,13 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
       _error = null;
     });
     try {
-      await SupabaseService.instance.deleteAccount(password: _password.text);
+      await SupabaseService.instance.deleteAccount(
+          password: _needsPassword ? _password.text : null);
       if (mounted) Navigator.of(context).pop(true);
     } on AccountDeletionException catch (e) {
       if (mounted) setState(() => _error = e.message);
     } catch (e) {
-      debugPrint('delete account failed: $e');
+      logDebug('delete account failed: $e');
       if (mounted) {
         setState(() => _error = "Couldn't delete the account. Try again.");
       }
@@ -256,6 +261,7 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
                   ? 'This permanently deletes your login and your whole shop: orders, customers, services, machines, expenses and all staff accounts. Customer tracking links stop working. This cannot be undone.'
                   : 'This permanently deletes your login. Your shop and its orders stay as they are. This cannot be undone.',
             ),
+            if (_needsPassword) ...[
             const SizedBox(height: 16),
             TextField(
               controller: _password,
@@ -274,6 +280,7 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
                 ),
               ),
             ),
+            ],
             const SizedBox(height: 12),
             TextField(
               controller: _confirm,

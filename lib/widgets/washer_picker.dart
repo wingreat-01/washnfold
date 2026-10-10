@@ -8,6 +8,7 @@ import '../providers/order_provider.dart';
 import '../providers/waitlist.dart';
 import '../providers/washer_provider.dart';
 import 'amount_due_dialog.dart';
+import '../utils/app_errors.dart';
 
 /// True while the washer picker sheet is on screen. The "washer just freed
 /// up" prompt stays quiet then, because the picker already updates live.
@@ -78,7 +79,7 @@ Future<void> assignOrderToWasher(
       try {
         await orders.setPayLater(order.id, true);
       } catch (e) {
-        debugPrint('could not save pay-later flag: $e');
+        logDebug('could not save pay-later flag: $e');
       }
     }
     return;
@@ -131,10 +132,10 @@ Future<void> loadOrderIntoWasher(
       await showAmountDueDialog(context, fresh, orders);
     }
   } catch (e) {
-    debugPrint('assign to washer failed: $e');
+    logDebug('assign to washer failed: $e');
     messenger.showSnackBar(SnackBar(
       content: Text(
-          e is StateError ? e.message : 'Could not assign washer: $e'),
+          friendlyError(e, fallback: 'Could not assign a washer. Please try again.')),
     ));
   }
 }

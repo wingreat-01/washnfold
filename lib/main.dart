@@ -13,11 +13,12 @@ import 'screens/customer_tracking_lookup_screen.dart';
 import 'screens/login_screen.dart';
 import 'services/supabase_service.dart';
 import 'theme/app_theme.dart';
+import 'utils/app_errors.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Clean URLs on web (washnfold.app/track/xxxx instead of /#/track/xxxx) —
+  // Clean URLs on web (/track/xxxx instead of /#/track/xxxx) —
   // matters here since the tracking link is what's encoded in the QR code
   // and handed to customers.
   usePathUrlStrategy();
@@ -85,6 +86,7 @@ class _RootGateState extends State<_RootGate> {
   bool _resolvingShop = false;
   String? _error;
   StreamSubscription<AuthState>? _authSub;
+  Timer? _activeTimer;
   final _shopNameController = TextEditingController();
   final _ownerNameController = TextEditingController();
   bool _creatingShop = false;
@@ -106,8 +108,8 @@ class _RootGateState extends State<_RootGate> {
           .createShop(shopName: shop, ownerName: owner);
       await _resolveShop();
     } catch (e) {
-      debugPrint('createShop failed: $e');
-      if (mounted) setState(() => _setupError = e.toString());
+      logDebug('createShop failed: $e');
+      if (mounted) setState(() => _setupError = friendlyError(e, fallback: "Couldn't set up your shop. Please try again."));
     } finally {
       if (mounted) setState(() => _creatingShop = false);
     }
@@ -123,18 +125,43 @@ class _RootGateState extends State<_RootGate> {
       _staff = staff;
       _shopId = staff?.shopId;
     } catch (e) {
-      debugPrint('resolveShop failed: $e');
+      logDebug('resolveShop failed: $e');
       _staff = null;
       _shopId = null;
-      _error = e.toString();
+      _error = friendlyError(e, fallback: 'Please check your connection and try again.');
     } finally {
       if (mounted) setState(() => _resolvingShop = false);
+    }
+  }
+
+  /// Re-checks the signed-in user's own staff row so a person switched off by
+  /// the owner is locked out within about a minute, instead of staying signed
+  /// in until their token expires. (The database also refuses their requests
+  /// once they are inactive — see the security_hardening SQL.)
+  Future<void> _recheckActive() async {
+    if (!mounted || !SupabaseService.instance.isSignedIn) return;
+    if (_staff == null || _resolvingShop) return;
+    try {
+      final latest = await SupabaseService.instance.fetchCurrentStaff();
+      if (!mounted) return;
+      if (latest == null) {
+        // Row no longer readable: treat as removed and return to sign-in.
+        await SupabaseService.instance.signOut();
+        return;
+      }
+      if (latest.active != _staff!.active || latest.role != _staff!.role) {
+        setState(() => _staff = latest);
+      }
+    } catch (e) {
+      logDebug('recheck staff failed: $e'); // offline: try again next tick
     }
   }
 
   @override
   void initState() {
     super.initState();
+    _activeTimer =
+        Timer.periodic(const Duration(seconds: 60), (_) => _recheckActive());
     // Rebuild on sign-in / sign-out so signOut() actually returns to login.
     _authSub =
         SupabaseService.instance.client.auth.onAuthStateChange.listen((data) {
@@ -158,6 +185,7 @@ class _RootGateState extends State<_RootGate> {
     _shopNameController.dispose();
     _ownerNameController.dispose();
     _authSub?.cancel();
+    _activeTimer?.cancel();
     super.dispose();
   }
 
@@ -169,7 +197,7 @@ class _RootGateState extends State<_RootGate> {
 
     if (_resolvingShop) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        body: SafeArea(child: Center(child: CircularProgressIndicator())),
       );
     }
 
@@ -177,7 +205,7 @@ class _RootGateState extends State<_RootGate> {
       // Signed in but no staff row yet: either a lookup error, or the
       // account was created before a shop was set up.
       return Scaffold(
-        body: Center(
+        body: SafeArea(child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: ConstrainedBox(
@@ -248,7 +276,7 @@ class _RootGateState extends State<_RootGate> {
               ),
             ),
           ),
-        ),
+        )),
       );
     }
 
@@ -256,7 +284,7 @@ class _RootGateState extends State<_RootGate> {
     // disabled server-side, this covers a session that was already open).
     if (_staff!.active == false) {
       return Scaffold(
-        body: Center(
+        body: SafeArea(child: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: ConstrainedBox(
@@ -285,7 +313,7 @@ class _RootGateState extends State<_RootGate> {
               ),
             ),
           ),
-        ),
+        )),
       );
     }
 

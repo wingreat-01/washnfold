@@ -13,6 +13,7 @@ import '../providers/tile_layout_settings.dart';
 import '../widgets/machine_alert_host.dart';
 import '../widgets/machine_timer.dart';
 import '../widgets/tile_columns_menu.dart';
+import '../utils/app_errors.dart';
 
 const _availableColor = Color(0xFF2F9E5B);
 const _inUseColor = Color(0xFFD97706); // same amber the "Drying" stage uses
@@ -102,7 +103,7 @@ class _DryerScreenState extends State<DryerScreen> {
     try {
       await provider.setEndsAt(dryer.id, newEnd);
     } catch (e) {
-      _snack('Could not update the timer: $e');
+      _snack(friendlyError(e, fallback: 'Could not update the timer.'));
     }
   }
 
@@ -139,8 +140,8 @@ class _DryerScreenState extends State<DryerScreen> {
       await dryers.release(dryer.id);
       if (order != null) await orders.advanceStatus(order.id, next);
     } catch (e) {
-      debugPrint('finish drying failed: $e');
-      _snack('Could not finish: $e');
+      logDebug('finish drying failed: $e');
+      _snack(friendlyError(e, fallback: 'Could not finish. Please try again.'));
     }
   }
 
@@ -661,8 +662,8 @@ class _DryerFormState extends State<_DryerForm> {
       }
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      debugPrint('save dryer failed: $e');
-      if (mounted) setState(() => _error = 'Could not save: $e');
+      logDebug('save dryer failed: $e');
+      if (mounted) setState(() => _error = friendlyError(e, fallback: 'Could not save. Please try again.'));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -690,7 +691,7 @@ class _DryerFormState extends State<_DryerForm> {
       await provider.deleteDryer(widget.existing!.id);
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      if (mounted) setState(() => _error = 'Could not delete: $e');
+      if (mounted) setState(() => _error = friendlyError(e, fallback: 'Could not delete. Please try again.'));
     }
   }
 

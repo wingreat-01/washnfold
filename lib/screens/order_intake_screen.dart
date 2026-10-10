@@ -10,6 +10,7 @@ import '../providers/order_provider.dart';
 import '../providers/service_catalog_provider.dart';
 import '../widgets/order_qr_dialog.dart';
 import '../widgets/washer_picker.dart';
+import '../utils/app_errors.dart';
 
 /// New-order intake: pick services, enter weight/piece count, see the running
 /// total, submit. This is the screen an attendant lives in.
@@ -184,12 +185,12 @@ class _OrderIntakeScreenState extends State<OrderIntakeScreen> {
     } catch (e) {
       // Previously a failure here was silent, which looked like the button
       // doing nothing. Show the real reason.
-      debugPrint('createOrder failed: $e');
+      logDebug('createOrder failed: $e');
       if (mounted) {
         setState(() => _submitting = false);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           duration: const Duration(seconds: 10),
-          content: Text('Could not create order: $e'),
+          content: Text(friendlyError(e, fallback: 'Could not create the order. Please try again.')),
         ));
       }
       return;

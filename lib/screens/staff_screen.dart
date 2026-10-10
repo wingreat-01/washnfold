@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/staff.dart';
 import '../services/supabase_service.dart';
+import '../utils/app_errors.dart';
 
 /// Owner-only tab: see everyone who works in the shop, add an attendant
 /// account (name + email + password), and switch an attendant on or off.
@@ -37,7 +38,7 @@ class _StaffScreenState extends State<StaffScreen> {
       final list = await SupabaseService.instance.fetchStaff(widget.shopId);
       if (mounted) setState(() => _staff = list);
     } catch (e) {
-      debugPrint('load staff failed: $e');
+      logDebug('load staff failed: $e');
       if (mounted) setState(() => _error = "Couldn't load your staff.");
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -66,7 +67,7 @@ class _StaffScreenState extends State<StaffScreen> {
       await SupabaseService.instance.setStaffActive(s.id, value);
       await _load();
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Could not update: $e')));
+      messenger.showSnackBar(SnackBar(content: Text(friendlyError(e, fallback: 'Could not update. Please try again.'))));
     }
   }
 
@@ -184,8 +185,8 @@ class _AddStaffSheetState extends State<_AddStaffSheet> {
       setState(() => _error = 'That email does not look right.');
       return;
     }
-    if (password.length < 6) {
-      setState(() => _error = 'Password must be at least 6 characters.');
+    if (password.length < 8) {
+      setState(() => _error = 'Password must be at least 8 characters.');
       return;
     }
 
@@ -201,8 +202,8 @@ class _AddStaffSheetState extends State<_AddStaffSheet> {
       );
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
-      debugPrint('create staff failed: $e');
-      if (mounted) setState(() => _error = e.toString());
+      logDebug('create staff failed: $e');
+      if (mounted) setState(() => _error = friendlyError(e, fallback: 'Could not create the account. Please try again.'));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -242,7 +243,7 @@ class _AddStaffSheetState extends State<_AddStaffSheet> {
               controller: _password,
               obscureText: !_showPassword,
               decoration: InputDecoration(
-                labelText: 'Password (min 6 characters)',
+                labelText: 'Password',
                 suffixIcon: IconButton(
                   tooltip: _showPassword ? 'Hide' : 'Show',
                   icon: Icon(_showPassword

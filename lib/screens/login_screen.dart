@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show AuthChangeEvent, AuthState;
 
 import '../services/supabase_service.dart';
 import '../widgets/privacy_policy_link.dart';
+import '../utils/app_errors.dart';
 
 class LoginScreen extends StatefulWidget {
   final VoidCallback onSignedIn;
@@ -23,6 +27,75 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _loading = false;
   String? _error;
   String? _info;
+
+  // Google sign-in on Android finishes in the background (browser → deep
+  // link), so wait for the auth event instead of an awaited call.
+  bool _awaitingGoogle = false;
+  StreamSubscription<AuthState>? _authSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _authSub =
+        SupabaseService.instance.client.auth.onAuthStateChange.listen((data) {
+      if (data.event == AuthChangeEvent.signedIn && _awaitingGoogle && mounted) {
+        _awaitingGoogle = false;
+        widget.onSignedIn();
+      }
+    });
+  }
+
+  Future<void> _google() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+      _info = null;
+      _awaitingGoogle = true;
+    });
+    try {
+      await SupabaseService.instance.signInWithGoogle();
+    } catch (e) {
+      logDebug('google sign-in failed: $e');
+      _awaitingGoogle = false;
+      if (mounted) {
+        setState(() =>
+            _error = 'Could not start Google sign-in. Please try again.');
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _forgotPassword() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty || !email.contains('@')) {
+      setState(() {
+        _info = null;
+        _error = 'Type your email above first, then tap "Forgot password?".';
+      });
+      return;
+    }
+    setState(() {
+      _loading = true;
+      _error = null;
+      _info = null;
+    });
+    try {
+      await SupabaseService.instance.sendPasswordReset(email);
+      if (mounted) {
+        setState(() => _info = 'If an account exists for $email, a reset '
+            'link is on its way. Check your inbox (and spam folder).');
+      }
+    } catch (e) {
+      logDebug('password reset failed: $e');
+      if (mounted) {
+        setState(() => _error =
+            "Couldn't send the reset email. Wait a minute and try again.");
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
 
   void _switchMode() {
     setState(() {
@@ -63,8 +136,8 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _error = 'Please fill in all fields.');
       return;
     }
-    if (password.length < 6) {
-      setState(() => _error = 'Password must be at least 6 characters.');
+    if (password.length < 8) {
+      setState(() => _error = 'Password must be at least 8 characters.');
       return;
     }
     if (password != _confirmController.text) {
@@ -93,8 +166,8 @@ class _LoginScreenState extends State<LoginScreen> {
           .createShop(shopName: shop, ownerName: name);
       widget.onSignedIn();
     } catch (e) {
-      debugPrint('create account failed: $e');
-      setState(() => _error = 'Could not create account: $e');
+      logDebug('create account failed: $e');
+      setState(() => _error = friendlyError(e, fallback: 'Could not create the account. Please try again.'));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -102,6 +175,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
+    _authSub?.cancel();
     _shopController.dispose();
     _nameController.dispose();
     _emailController.dispose();
@@ -113,7 +187,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
+      body: SafeArea(child: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: ConstrainedBox(
@@ -122,8 +196,7 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Icon(Icons.local_laundry_service,
-                    size: 48, color: Theme.of(context).colorScheme.primary),
+                Image.asset('assets/icon/logo.png', height: 88),
                 const SizedBox(height: 12),
                 Text(
                   'WashNFold',
@@ -166,6 +239,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: const InputDecoration(labelText: 'Password'),
                   onSubmitted: (_) => _createMode ? null : _submit(),
                 ),
+                if (!_createMode)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: _loading ? null : _forgotPassword,
+                      child: const Text('Forgot password?'),
+                    ),
+                  ),
                 if (_createMode) ...[
                   const SizedBox(height: 12),
                   TextField(
@@ -198,6 +279,24 @@ class _LoginScreenState extends State<LoginScreen> {
                         : Text(_createMode ? 'Create owner account' : 'Sign in'),
                   ),
                 ),
+                const SizedBox(height: 12),
+                Row(children: const [
+                  Expanded(child: Divider()),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    child: Text('or'),
+                  ),
+                  Expanded(child: Divider()),
+                ]),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: _loading ? null : _google,
+                  icon: const Icon(Icons.account_circle_outlined),
+                  label: const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: Text('Continue with Google'),
+                  ),
+                ),
                 const SizedBox(height: 8),
                 TextButton(
                   onPressed: _loading ? null : _switchMode,
@@ -222,7 +321,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
-      ),
+      )),
     );
   }
 }

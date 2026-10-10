@@ -14,6 +14,7 @@ import '../widgets/amount_due_dialog.dart';
 import '../widgets/order_card.dart';
 import '../widgets/order_qr_dialog.dart';
 import '../widgets/washer_picker.dart';
+import '../utils/app_errors.dart';
 
 /// The live queue. On wide screens (web/tablet) this shows every pipeline
 /// stage side by side, kanban-style, since that's where an owner watching
@@ -303,7 +304,7 @@ Future<void> _advanceOrder(
   } catch (e) {
     if (context.mounted) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Could not update order: $e')));
+          .showSnackBar(SnackBar(content: Text(friendlyError(e, fallback: 'Could not update the order. Please try again.'))));
     }
   }
 }

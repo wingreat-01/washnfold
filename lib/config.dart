@@ -22,6 +22,11 @@ class AppConfig {
     defaultValue: 'https://wnf.prohubapps.com',
   );
 
+  /// Where Google sign-in returns to inside the Android app. Must also be
+  /// listed under Supabase → Authentication → URL Configuration → Redirect
+  /// URLs, and match the intent-filter in AndroidManifest.xml.
+  static const mobileAuthRedirect = 'io.supabase.washnfold://login-callback';
+
   /// Public privacy policy page (served from web/privacy/index.html).
   static String get privacyPolicyUrl => '$webBaseUrl/privacy';
 

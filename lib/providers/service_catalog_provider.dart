@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 
 import '../models/service_item.dart';
 import '../services/supabase_service.dart';
+import '../utils/app_errors.dart';
 
 /// Owns the shop's configurable services and pricing — what shows up when
 /// an attendant builds an order (Wash & Fold, Dry Clean, add-ons, etc).
@@ -36,7 +37,7 @@ class ServiceCatalogProvider extends ChangeNotifier {
           .map((r) => ServiceItem.fromJson(r as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      debugPrint('load services failed: $e');
+      logDebug('load services failed: $e');
     } finally {
       _loading = false;
       notifyListeners();

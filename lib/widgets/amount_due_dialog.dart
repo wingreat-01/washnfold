@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../models/order.dart';
 import '../models/payment.dart';
 import '../providers/order_provider.dart';
+import '../utils/app_errors.dart';
 
 /// Shows the "Amount due" checkout modal for [order] and, if the cashier
 /// confirms, records the payment. Returns true when the order was marked
@@ -190,7 +191,7 @@ class _AmountDueDialogState extends State<AmountDueDialog> {
       if (!mounted) return;
       Navigator.of(context).pop(true);
     } catch (e) {
-      debugPrint('record payment failed: $e');
+      logDebug('record payment failed: $e');
       if (!mounted) return;
       setState(() {
         _submitting = false;

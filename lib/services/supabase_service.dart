@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../config.dart';
 import '../models/order_queue_info.dart';
 import '../models/public_order_status.dart';
+import '../models/sales_today.dart';
 import '../models/staff.dart';
 
 /// Thin wrapper around the Supabase client so the rest of the app never
@@ -30,6 +32,34 @@ class SupabaseService {
     required String password,
   }) async {
     await client.auth.signInWithPassword(email: email, password: password);
+  }
+
+  /// Starts "Continue with Google". On the web the page leaves for Google and
+  /// comes back signed in (the app restarts and picks the session up). On
+  /// Android the browser opens and returns through the deep link in
+  /// AndroidManifest.xml; listen to the auth stream to know when it is done.
+  Future<void> signInWithGoogle() async {
+    await client.auth.signInWithOAuth(
+      OAuthProvider.google,
+      redirectTo: kIsWeb ? Uri.base.origin : AppConfig.mobileAuthRedirect,
+    );
+  }
+
+  /// Sends the "reset your password" email. The link in the email opens the
+  /// hosted page at <WEB_BASE_URL>/reset-password (web/reset-password/
+  /// index.html), where the person chooses a new password in any browser.
+  /// Supabase answers the same way whether or not the email has an account,
+  /// so this never reveals who is registered.
+  Future<void> sendPasswordReset(String email) async {
+    await client.auth.resetPasswordForEmail(email);
+  }
+
+  /// True when this login has an email + password (owner-created staff, or a
+  /// normal sign-up). A Google-only login has no password to re-check.
+  bool get hasPasswordLogin {
+    final providers = currentUser?.appMetadata['providers'];
+    if (providers is List) return providers.contains('email');
+    return currentUser?.appMetadata['provider'] == 'email';
   }
 
   /// Returns true if a session was created right away. Returns false when
@@ -62,15 +92,22 @@ class SupabaseService {
   /// needs the service-role key). Owners lose the whole shop; attendants
   /// only lose their own login. Throws [AccountDeletionException] with a
   /// readable message on failure.
-  Future<void> deleteAccount({required String password}) async {
+  Future<void> deleteAccount({String? password}) async {
     final email = currentUser?.email;
     if (email == null) {
       throw AccountDeletionException('You are not signed in.');
     }
-    try {
-      await client.auth.signInWithPassword(email: email, password: password);
-    } on AuthException {
-      throw AccountDeletionException('That password is not correct.');
+    // Google-only logins have no password; the dialog's "type DELETE" step is
+    // their confirmation.
+    if (hasPasswordLogin) {
+      if (password == null || password.isEmpty) {
+        throw AccountDeletionException('Enter your password to continue.');
+      }
+      try {
+        await client.auth.signInWithPassword(email: email, password: password);
+      } on AuthException {
+        throw AccountDeletionException('That password is not correct.');
+      }
     }
     try {
       final res = await client.functions
@@ -85,7 +122,7 @@ class SupabaseService {
         throw AccountDeletionException(d['error'].toString());
       }
       throw AccountDeletionException(
-          "Couldn't reach the server (${e.status}). Is the delete-account function deployed?");
+          "Couldn't delete the account right now. Please try again.");
     }
     // The login no longer exists server-side, so only clear the local
     // session (a global sign-out would be rejected).
@@ -160,8 +197,16 @@ class SupabaseService {
         throw StaffActionException(d['error'].toString());
       }
       throw StaffActionException(
-          "Couldn't reach the server (${e.status}). Is the manage-staff function deployed?");
+          "Couldn't reach the server. Please try again.");
     }
+  }
+
+  /// The signed-in staff member's own collections today plus the shop's total
+  /// today (see get_my_sales_today in the part 3 SQL).
+  Future<SalesToday> fetchSalesToday() async {
+    final rows = await client.rpc('get_my_sales_today');
+    return SalesToday.fromRows(
+        (rows as List).map((r) => r as Map<String, dynamic>).toList());
   }
 
   /// Public, no-login lookup used by the customer tracking page (`/track/:id`).

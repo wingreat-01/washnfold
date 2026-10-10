@@ -63,9 +63,9 @@
       <button id="track-button" type="submit">Track my laundry</button>
     </form>
     <div id="message" class="message" role="status" aria-live="polite"></div>
-    <section id="result" class="result" aria-live="polite">
+    <section id="result" class="result">
       <p id="shop-name" class="shop"></p>
-      <span id="status-pill" class="status-pill"><span class="dot"></span><span id="status-label"></span></span>
+      <span id="status-pill" class="status-pill" aria-live="polite"><span class="dot"></span><span id="status-label"></span></span>
       <ul id="timeline" class="timeline"></ul>
       <p id="ready-info" class="updated"></p>
       <p id="last-updated" class="updated"></p>
@@ -93,6 +93,11 @@
     received: 'Received', washing: 'Washing', drying: 'Drying',
     folding_pressing: 'Folding', ready: 'Ready for Pickup', picked_up: 'Picked Up'
   };
+  const POLL_MS = 15000;           // how often to re-check while the page is open
+  let activeReference = null;     // the reference currently being watched
+  let pollTimer = null;
+  let inFlight = false;
+  let lastKey = '';               // detects real changes so the page isn't redrawn needlessly
   const configured = !SUPABASE_URL.startsWith('YOUR_') && !SUPABASE_ANON_KEY.startsWith('YOUR_');
   const client = configured ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
@@ -112,21 +117,19 @@
     event.preventDefault();
     if (!client || !shopId) return;
     clearMessage(); result.classList.remove('show');
+    stopPolling(); lastKey = '';
     const reference = input.value.trim().toUpperCase();
     if (!reference) { showMessage('Enter the reference number from your receipt.', 'error'); return; }
     button.disabled = true; button.textContent = 'Checking…';
     try {
-      const { data, error } = await client.rpc('get_order_public_status_by_reference', {
-        p_shop_id: shopId,
-        p_reference: reference
-      });
-      if (error) throw error;
-      const order = Array.isArray(data) ? data[0] : data;
+      const order = await lookup(reference);
       if (!order) {
         showMessage('We could not find that order for this shop. Check the reference number on your receipt and try again.', 'error');
         return;
       }
+      activeReference = reference;
       renderOrder(order);
+      startPolling(order);
     } catch (error) {
       console.error('Laundry tracking lookup failed:', error);
       showMessage('We could not check the order right now. Please try again in a moment or contact the shop.', 'error');
@@ -135,9 +138,67 @@
     }
   });
 
+  async function lookup(reference) {
+    const { data, error } = await client.rpc('get_order_public_status_by_reference', {
+      p_shop_id: shopId,
+      p_reference: reference
+    });
+    if (error) throw error;
+    return Array.isArray(data) ? data[0] : data;
+  }
+
+  // Live updates: the page re-checks the order every few seconds while it is
+  // visible. (Supabase realtime isn't used because anonymous visitors can't
+  // read the orders table; this uses the same safe public function instead.)
+  function isFinished(order) {
+    return String(order.status || '').toLowerCase() === 'picked_up';
+  }
+  function startPolling(order) {
+    stopPolling();
+    if (!activeReference || isFinished(order)) return;
+    pollTimer = setInterval(refresh, POLL_MS);
+  }
+  function stopPolling() {
+    if (pollTimer) clearInterval(pollTimer);
+    pollTimer = null;
+  }
+  async function refresh() {
+    if (!activeReference || inFlight || document.hidden) return;
+    inFlight = true;
+    try {
+      const order = await lookup(activeReference);
+      if (!order) return;                       // keep showing the last known status
+      renderOrder(order);
+      if (isFinished(order)) stopPolling();
+    } catch (error) {
+      // Silent: keep the last status on screen and try again next tick.
+      console.error('Laundry tracking refresh failed:', error);
+      setUpdated('Couldn\u2019t refresh just now \u00b7 will try again automatically.');
+    } finally {
+      inFlight = false;
+    }
+  }
+  // Coming back to the tab (or unlocking the phone): refresh right away
+  // instead of waiting for the next tick.
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && pollTimer) refresh();
+  });
+  window.addEventListener('pagehide', stopPolling);
+
+  function setUpdated(text) { document.querySelector('#last-updated').textContent = text; }
+
   function renderOrder(order) {
     const status = String(order.status || '').toLowerCase();
     const index = statusOrder.indexOf(status);
+    const key = [status, order.shop_name, order.ready_at, order.picked_up_at].join('|');
+    const finished = status === 'picked_up';
+    const time = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+    setUpdated(finished
+      ? 'Last checked at ' + time + '.'
+      : 'Last checked at ' + time + ' \u00b7 this page updates automatically.');
+    result.classList.add('show');
+    if (key === lastKey) return;      // nothing changed: leave the page as is
+    lastKey = key;
     document.querySelector('#shop-name').textContent = order.shop_name || 'Your laundry shop';
     document.querySelector('#status-label').textContent = statusNames[status] || 'Status unavailable';
     const timeline = document.querySelector('#timeline'); timeline.replaceChildren();
@@ -153,8 +214,6 @@
     if (status === 'ready') ready.textContent = 'Your laundry is ready. Please contact the shop if you need pickup details.';
     else if (status === 'picked_up') ready.textContent = 'This order has been marked as picked up.';
     else ready.textContent = '';
-    document.querySelector('#last-updated').textContent = 'Checked just now · Refresh this page later to see the latest status.';
-    result.classList.add('show');
   }
   function showMessage(text, type) { message.textContent = text; message.className = `message ${type}`; }
   function clearMessage() { message.textContent = ''; message.className = 'message'; }

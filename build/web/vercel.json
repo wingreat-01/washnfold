@@ -1,8 +1,0 @@
-{
-  "rewrites": [
-    { "source": "/track", "destination": "/track/index.html" },
-    { "source": "/delete-account", "destination": "/delete-account/index.html" },
-    { "source": "/privacy", "destination": "/privacy/index.html" },
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
-}

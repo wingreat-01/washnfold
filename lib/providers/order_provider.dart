@@ -7,6 +7,7 @@ import '../models/order.dart';
 import '../models/order_item.dart';
 import '../models/payment.dart';
 import '../services/supabase_service.dart';
+import '../utils/app_errors.dart';
 
 /// Thrown when a new order's customer name is already taken in this shop.
 class DuplicateCustomerNameException implements Exception {
@@ -56,7 +57,7 @@ class OrderProvider extends ChangeNotifier {
           .map((r) => Order.fromJson(r as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      debugPrint('load orders failed: $e');
+      logDebug('load orders failed: $e');
     } finally {
       _loading = false;
       notifyListeners();
@@ -81,7 +82,7 @@ class OrderProvider extends ChangeNotifier {
           .toList();
       notifyListeners();
       } catch (e) {
-        debugPrint('refresh orders failed: $e');
+        logDebug('refresh orders failed: $e');
       }
     });
   }

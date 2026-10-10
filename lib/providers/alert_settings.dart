@@ -1,6 +1,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../utils/app_errors.dart';
 
 /// Device-level preference: play a chime when a washer or dryer finishes.
 /// Off by default; remembered on this device. The banner is always shown
@@ -17,7 +18,7 @@ class AlertSettings extends ChangeNotifier {
       _soundOn = prefs.getBool(_key) ?? false;
       notifyListeners();
     } catch (e) {
-      debugPrint('load alert settings failed: $e');
+      logDebug('load alert settings failed: $e');
     }
   }
 
@@ -28,7 +29,7 @@ class AlertSettings extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_key, on);
     } catch (e) {
-      debugPrint('save alert settings failed: $e');
+      logDebug('save alert settings failed: $e');
     }
   }
 }
@@ -45,7 +46,7 @@ class AlertSound {
       await p.stop();
       await p.play(AssetSource('sounds/finished.wav'));
     } catch (e) {
-      debugPrint('alert sound failed: $e');
+      logDebug('alert sound failed: $e');
     }
   }
 }

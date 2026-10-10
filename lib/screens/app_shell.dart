@@ -18,6 +18,7 @@ import '../widgets/shop_qr_dialog.dart';
 import '../widgets/washer_free_prompt.dart';
 import 'dashboard_screen.dart';
 import 'dryer_screen.dart';
+import 'my_sales_screen.dart';
 import 'order_intake_screen.dart';
 import 'order_queue_screen.dart';
 import 'settings_screen.dart';
@@ -50,7 +51,12 @@ class _AppShellState extends State<AppShell> {
         const _Tab(Icons.local_laundry_service_outlined, Icons.local_laundry_service_rounded, 'Washers', WasherScreen()),
         const _Tab(Icons.dry_cleaning_outlined, Icons.dry_cleaning_rounded, 'Dryers', DryerScreen()),
         if (role.canViewReports)
-          const _Tab(Icons.space_dashboard_outlined, Icons.space_dashboard_rounded, 'Dashboard', DashboardScreen()),
+          const _Tab(Icons.space_dashboard_outlined, Icons.space_dashboard_rounded, 'Dashboard', DashboardScreen())
+        else
+          // Attendants: own collections + shop total for TODAY only (the
+          // database enforces "today"; the full dashboard stays owner-only).
+          _Tab(Icons.payments_outlined, Icons.payments_rounded, 'My sales',
+              MySalesScreen(active: _index == 4)),
       ];
 
   void _openSettings(BuildContext context) {
