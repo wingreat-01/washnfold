@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1769e0">
+  <meta name="description" content="Securely check the status of your Laundry Mate laundry order.">
+  <title>Track Your Laundry | Laundry Mate</title>
+  <style>
+    :root { color-scheme: light; --blue:#1769e0; --ink:#172033; --muted:#657086; --line:#e1e7f0; --bg:#f4f7fb; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; color:var(--ink); background:linear-gradient(180deg,#eaf2ff 0,#f7f9fc 280px,var(--bg) 100%); display:flex; justify-content:center; padding:28px 14px; }
+    main { width:100%; max-width:480px; }
+    .brand { text-align:center; margin:8px 0 22px; }
+    .logo { width:58px;height:58px;margin:0 auto 10px;border-radius:18px;background:var(--blue);color:white;display:grid;place-items:center;font-size:28px;box-shadow:0 8px 22px #1769e033; }
+    h1 { margin:0;font-size:26px;letter-spacing:-.5px; }
+    .sub { color:var(--muted);font-size:14px;margin:7px 0 0; }
+    .card { background:white;border:1px solid var(--line);border-radius:22px;padding:23px;box-shadow:0 12px 35px #22395a0a; }
+    label { display:block;font-weight:650;font-size:14px;margin:0 0 8px; }
+    input { width:100%;font:inherit;font-size:16px;padding:14px;border:1px solid #cfd8e6;border-radius:12px;outline:none;background:#fff; }
+    input:focus { border-color:var(--blue);box-shadow:0 0 0 3px #1769e01b; }
+    .field { margin:0 0 17px; }
+    button { width:100%;border:0;border-radius:12px;padding:14px 16px;font:inherit;font-weight:700;background:var(--blue);color:white;cursor:pointer; }
+    button:disabled { opacity:.65;cursor:wait; }
+    .hint { color:var(--muted);font-size:12px;line-height:1.5;margin:8px 0 0; }
+    .message { margin-top:16px;padding:12px 13px;border-radius:12px;font-size:14px;line-height:1.5;display:none;overflow-wrap:anywhere; }
+    .message.error { display:block;background:#fff0f0;color:#9b2020;border:1px solid #ffd5d5; }
+    .message.info { display:block;background:#edf5ff;color:#194f91;border:1px solid #d7e8ff; }
+    .result { display:none;margin-top:18px;border-top:1px solid var(--line);padding-top:19px; }
+    .result.show { display:block; }
+    .shop { font-size:13px;color:var(--muted);margin:0 0 10px; }
+    .status-pill { display:inline-flex;align-items:center;gap:8px;border-radius:999px;background:#eaf2ff;color:#174d9d;padding:8px 12px;font-weight:750;font-size:14px; }
+    .dot { width:8px;height:8px;border-radius:50%;background:currentColor; }
+    .timeline { margin:20px 0 2px;padding:0;list-style:none; }
+    .timeline li { position:relative;display:flex;gap:12px;padding:0 0 19px;color:#8791a2;font-size:14px; }
+    .timeline li:last-child { padding-bottom:0; }
+    .timeline li:not(:last-child)::after { content:"";position:absolute;left:10px;top:22px;width:2px;height:calc(100% - 20px);background:#e2e7ef; }
+    .node { flex:0 0 22px;width:22px;height:22px;border:2px solid #d3dbe7;border-radius:50%;background:white;z-index:1; }
+    .timeline li.done { color:#263449; }
+    .timeline li.done .node { border-color:#20a36b;background:#20a36b;box-shadow:inset 0 0 0 4px white; }
+    .timeline li.current { color:#174d9d;font-weight:750; }
+    .timeline li.current .node { border-color:var(--blue);background:#dceaff;box-shadow:inset 0 0 0 4px var(--blue); }
+    .updated { color:var(--muted);font-size:12px;margin:16px 0 0; }
+    footer { color:var(--muted);text-align:center;font-size:12px;line-height:1.6;padding:18px 10px; }
+    footer a { color:inherit; }
+    @media (max-width:360px) { .card{padding:18px} h1{font-size:23px} }
+  </style>
+</head>
+<body>
+<main>
+  <header class="brand">
+    <div class="logo" aria-hidden="true">◉</div>
+    <h1>Track Your Laundry</h1>
+    <p class="sub" id="intro">Enter the reference printed on your laundry receipt.</p>
+  </header>
+  <section class="card" aria-label="Laundry tracking form">
+    <form id="track-form">
+      <div class="field">
+        <label for="reference">Order reference number</label>
+        <input id="reference" name="reference" autocomplete="off" autocapitalize="characters" maxlength="40" placeholder="e.g. WF-8FEC9X" required>
+        <p class="hint">Your shop's QR code identifies the laundry shop. Use the reference printed on your receipt.</p>
+      </div>
+      <button id="track-button" type="submit">Track my laundry</button>
+    </form>
+    <div id="message" class="message" role="status" aria-live="polite"></div>
+    <section id="result" class="result">
+      <p id="shop-name" class="shop"></p>
+      <span id="status-pill" class="status-pill" aria-live="polite"><span class="dot"></span><span id="status-label"></span></span>
+      <ul id="timeline" class="timeline"></ul>
+      <p id="ready-info" class="updated"></p>
+      <p id="last-updated" class="updated"></p>
+    </section>
+  </section>
+  <footer>Only basic order progress is shown here. If you need help with your order, please contact your laundry shop.</footer>
+</main>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+  // REQUIRED: Replace these two placeholders with your Supabase project's URL and anon/publishable key.
+  // Never put a service_role key in this webpage.
+  const SUPABASE_URL = 'https://dietefbjoywhmebwzhww.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZXRlZmJqb3l3aG1lYnd6aHd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNzE3NjAsImV4cCI6MjEwNjg0Nzc2MH0.HgVdhqoifW0nJs9jdLkspT4gfggrkmCzJazy71LSouY';
+  const params = new URLSearchParams(location.search);
+  const shopId = (params.get('shop') || '').trim();
+  const form = document.querySelector('#track-form');
+  const input = document.querySelector('#reference');
+  const button = document.querySelector('#track-button');
+  const message = document.querySelector('#message');
+  const result = document.querySelector('#result');
+  const labels = ['Received', 'Washing', 'Drying', 'Folding', 'Ready for Pickup', 'Picked Up'];
+  const statusOrder = ['received', 'washing', 'drying', 'folding_pressing', 'ready', 'picked_up'];
+  const statusNames = {
+    received: 'Received', washing: 'Washing', drying: 'Drying',
+    folding_pressing: 'Folding', ready: 'Ready for Pickup', picked_up: 'Picked Up'
+  };
+  const POLL_MS = 15000;           // how often to re-check while the page is open
+  let activeReference = null;     // the reference currently being watched
+  let pollTimer = null;
+  let inFlight = false;
+  let lastKey = '';               // detects real changes so the page isn't redrawn needlessly
+  const configured = !SUPABASE_URL.startsWith('YOUR_') && !SUPABASE_ANON_KEY.startsWith('YOUR_');
+  const client = configured ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+  if (!shopId) {
+    showMessage('This tracking link is missing the shop code. Please scan the QR code displayed by your laundry shop.', 'error');
+    button.disabled = true;
+  } else if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(shopId)) {
+    showMessage('This shop link is invalid. Please scan the QR code at the shop again.', 'error');
+    button.disabled = true;
+  }
+  if (!configured) {
+    showMessage('Website setup is incomplete: add your Supabase project URL and anon/publishable key in index.html before publishing.', 'error');
+    button.disabled = true;
+  }
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!client || !shopId) return;
+    clearMessage(); result.classList.remove('show');
+    stopPolling(); lastKey = '';
+    const reference = input.value.trim().toUpperCase();
+    if (!reference) { showMessage('Enter the reference number from your receipt.', 'error'); return; }
+    button.disabled = true; button.textContent = 'Checking…';
+    try {
+      const order = await lookup(reference);
+      if (!order) {
+        showMessage('We could not find that order for this shop. Check the reference number on your receipt and try again.', 'error');
+        return;
+      }
+      activeReference = reference;
+      renderOrder(order);
+      startPolling(order);
+    } catch (error) {
+      console.error('Laundry tracking lookup failed:', error);
+      showMessage('We could not check the order right now. Please try again in a moment or contact the shop.', 'error');
+    } finally {
+      button.disabled = false; button.textContent = 'Track my laundry';
+    }
+  });
+
+  async function lookup(reference) {
+    const { data, error } = await client.rpc('get_order_public_status_by_reference', {
+      p_shop_id: shopId,
+      p_reference: reference
+    });
+    if (error) throw error;
+    return Array.isArray(data) ? data[0] : data;
+  }
+
+  // Live updates: the page re-checks the order every few seconds while it is
+  // visible. (Supabase realtime isn't used because anonymous visitors can't
+  // read the orders table; this uses the same safe public function instead.)
+  function isFinished(order) {
+    return String(order.status || '').toLowerCase() === 'picked_up';
+  }
+  function startPolling(order) {
+    stopPolling();
+    if (!activeReference || isFinished(order)) return;
+    pollTimer = setInterval(refresh, POLL_MS);
+  }
+  function stopPolling() {
+    if (pollTimer) clearInterval(pollTimer);
+    pollTimer = null;
+  }
+  async function refresh() {
+    if (!activeReference || inFlight || document.hidden) return;
+    inFlight = true;
+    try {
+      const order = await lookup(activeReference);
+      if (!order) return;                       // keep showing the last known status
+      renderOrder(order);
+      if (isFinished(order)) stopPolling();
+    } catch (error) {
+      // Silent: keep the last status on screen and try again next tick.
+      console.error('Laundry tracking refresh failed:', error);
+      setUpdated('Couldn\u2019t refresh just now \u00b7 will try again automatically.');
+    } finally {
+      inFlight = false;
+    }
+  }
+  // Coming back to the tab (or unlocking the phone): refresh right away
+  // instead of waiting for the next tick.
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && pollTimer) refresh();
+  });
+  window.addEventListener('pagehide', stopPolling);
+
+  function setUpdated(text) { document.querySelector('#last-updated').textContent = text; }
+
+  function renderOrder(order) {
+    const status = String(order.status || '').toLowerCase();
+    const index = statusOrder.indexOf(status);
+    const key = [status, order.shop_name, order.ready_at, order.picked_up_at].join('|');
+    const finished = status === 'picked_up';
+    const time = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+    setUpdated(finished
+      ? 'Last checked at ' + time + '.'
+      : 'Last checked at ' + time + ' \u00b7 this page updates automatically.');
+    result.classList.add('show');
+    if (key === lastKey) return;      // nothing changed: leave the page as is
+    lastKey = key;
+    document.querySelector('#shop-name').textContent = order.shop_name || 'Your laundry shop';
+    document.querySelector('#status-label').textContent = statusNames[status] || 'Status unavailable';
+    const timeline = document.querySelector('#timeline'); timeline.replaceChildren();
+    labels.forEach((label, i) => {
+      const li = document.createElement('li');
+      if (index >= 0 && i < index) li.classList.add('done');
+      if (i === index) li.classList.add('current');
+      const node = document.createElement('span'); node.className = 'node'; node.setAttribute('aria-hidden', 'true');
+      const text = document.createElement('span'); text.textContent = label;
+      li.append(node, text); timeline.append(li);
+    });
+    const ready = document.querySelector('#ready-info');
+    if (status === 'ready') ready.textContent = 'Your laundry is ready. Please contact the shop if you need pickup details.';
+    else if (status === 'picked_up') ready.textContent = 'This order has been marked as picked up.';
+    else ready.textContent = '';
+  }
+  function showMessage(text, type) { message.textContent = text; message.className = `message ${type}`; }
+  function clearMessage() { message.textContent = ''; message.className = 'message'; }
+</script>
+</body>
+</html>
