@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/public_order_status.dart';
 import '../services/supabase_service.dart';
 import 'customer_tracking_screen.dart';
+import '../theme/app_theme.dart';
 
 /// Public entry point for a shop's permanent QR code. Customers enter the
 /// reference printed on their receipt; no account or app installation needed.
@@ -72,7 +73,7 @@ class _CustomerTrackingLookupScreenState
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FA),
+      backgroundColor: context.isDark ? context.palette.canvas : const Color(0xFFF7F9FA),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(

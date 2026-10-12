@@ -10,6 +10,7 @@ import '../providers/service_catalog_provider.dart';
 import '../providers/dashboard_provider.dart';
 import '../providers/washer_provider.dart';
 import '../services/supabase_service.dart';
+import '../theme/app_theme.dart';
 import '../providers/alert_settings.dart';
 import '../providers/tile_layout_settings.dart';
 import '../widgets/machine_alert_host.dart';
@@ -21,6 +22,7 @@ import 'dryer_screen.dart';
 import 'my_sales_screen.dart';
 import 'order_intake_screen.dart';
 import 'order_queue_screen.dart';
+import 'sales_reports_screen.dart';
 import 'settings_screen.dart';
 import 'washer_screen.dart';
 
@@ -51,7 +53,9 @@ class _AppShellState extends State<AppShell> {
         const _Tab(Icons.local_laundry_service_outlined, Icons.local_laundry_service_rounded, 'Washers', WasherScreen()),
         const _Tab(Icons.dry_cleaning_outlined, Icons.dry_cleaning_rounded, 'Dryers', DryerScreen()),
         if (role.canViewReports)
-          const _Tab(Icons.space_dashboard_outlined, Icons.space_dashboard_rounded, 'Dashboard', DashboardScreen())
+          const _Tab(Icons.space_dashboard_outlined, Icons.space_dashboard_rounded, 'Dashboard', DashboardScreen()),
+        if (role.canViewReports)
+          const _Tab(Icons.bar_chart_rounded, Icons.bar_chart_rounded, 'Sales reports', SalesReportsScreen())
         else
           // Attendants: own collections + shop total for TODAY only (the
           // database enforces "today"; the full dashboard stays owner-only).
@@ -114,12 +118,12 @@ class _AppShellState extends State<AppShell> {
               body: Row(
                 children: [
                   NavigationRail(
-                    backgroundColor: Colors.white,
-                    indicatorColor: const Color(0xFF2677C9).withOpacity(.12),
-                    selectedIconTheme: const IconThemeData(color: Color(0xFF2677C9)),
-                    unselectedIconTheme: const IconThemeData(color: Color(0xFF718096)),
-                    selectedLabelTextStyle: const TextStyle(color: Color(0xFF123047), fontWeight: FontWeight.w700),
-                    unselectedLabelTextStyle: const TextStyle(color: Color(0xFF718096)),
+                    backgroundColor: context.palette.surface,
+                    indicatorColor: context.palette.accent.withOpacity(.12),
+                    selectedIconTheme: IconThemeData(color: context.palette.accent),
+                    unselectedIconTheme: IconThemeData(color: context.palette.muted),
+                    selectedLabelTextStyle: TextStyle(color: context.palette.strong, fontWeight: FontWeight.w700),
+                    unselectedLabelTextStyle: TextStyle(color: context.palette.muted),
                     selectedIndex: _index,
                     onDestinationSelected: (i) => setState(() => _index = i),
                     labelType: NavigationRailLabelType.all,
@@ -129,11 +133,11 @@ class _AppShellState extends State<AppShell> {
                         children: [
                           Container(
                             width: 46, height: 46,
-                            decoration: BoxDecoration(color: const Color(0xFF2677C9).withOpacity(.11), borderRadius: BorderRadius.circular(15)),
-                            child: const Icon(Icons.local_laundry_service_rounded, color: Color(0xFF2677C9), size: 27),
+                            decoration: BoxDecoration(color: context.palette.accent.withOpacity(.11), borderRadius: BorderRadius.circular(15)),
+                            child: Icon(Icons.local_laundry_service_rounded, color: context.palette.accent, size: 27),
                           ),
                           const SizedBox(height: 4),
-                          const Text('WashNFold', style: TextStyle(fontWeight: FontWeight.w800, color: Color(0xFF123047))),
+                          Text('Laundry Mate', style: TextStyle(fontWeight: FontWeight.w800, color: context.palette.strong)),
                         ],
                       ),
                     ),
@@ -273,10 +277,6 @@ class _ScrollableNavBar extends StatefulWidget {
 
 class _ScrollableNavBarState extends State<_ScrollableNavBar> {
   static const _visibleTabs = 5;
-  static const _blue = Color(0xFF2677C9);
-  static const _navy = Color(0xFF123047);
-  static const _grey = Color(0xFF718096);
-
   final _controller = ScrollController();
   double _itemWidth = 0;
   bool _moreToRight = false;
@@ -335,9 +335,9 @@ class _ScrollableNavBarState extends State<_ScrollableNavBar> {
   Widget build(BuildContext context) {
     final count = widget.tabs.length;
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFE7EDF4))),
+      decoration: BoxDecoration(
+        color: context.palette.surface,
+        border: Border(top: BorderSide(color: context.palette.border)),
       ),
       child: SafeArea(
         top: false,
@@ -389,13 +389,13 @@ class _ScrollableNavBarState extends State<_ScrollableNavBar> {
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
-                                Colors.white.withOpacity(0),
-                                Colors.white,
+                                context.palette.surface.withOpacity(0),
+                                context.palette.surface,
                               ],
                             ),
                           ),
-                          child: const Icon(Icons.chevron_right_rounded,
-                              size: 20, color: _grey),
+                          child: Icon(Icons.chevron_right_rounded,
+                              size: 20, color: context.palette.muted),
                         ),
                       ),
                     ),
@@ -434,7 +434,7 @@ class _NavItem extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: selected
-                  ? _ScrollableNavBarState._blue.withOpacity(.12)
+                  ? context.palette.accent.withOpacity(.12)
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(15),
             ),
@@ -442,8 +442,8 @@ class _NavItem extends StatelessWidget {
               selected ? tab.selectedIcon : tab.icon,
               size: 24,
               color: selected
-                  ? _ScrollableNavBarState._blue
-                  : _ScrollableNavBarState._grey,
+                  ? context.palette.accent
+                  : context.palette.muted,
             ),
           ),
           const SizedBox(height: 4),
@@ -457,8 +457,8 @@ class _NavItem extends StatelessWidget {
                 fontSize: 11,
                 fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
                 color: selected
-                    ? _ScrollableNavBarState._navy
-                    : _ScrollableNavBarState._grey,
+                    ? context.palette.strong
+                    : context.palette.muted,
               ),
             ),
           ),

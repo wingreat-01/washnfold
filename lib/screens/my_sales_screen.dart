@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../models/sales_today.dart';
 import '../services/supabase_service.dart';
 import '../utils/app_errors.dart';
+import '../theme/app_theme.dart';
 
 /// Attendant tab: what I collected today, the shop's total today, and a cash
 /// check (counted drawer vs what the app recorded). Today only, decided in
@@ -20,8 +21,6 @@ class MySalesScreen extends StatefulWidget {
 }
 
 class _MySalesScreenState extends State<MySalesScreen> {
-  static const _navy = Color(0xFF123047);
-  static const _grey = Color(0xFF718096);
 
   final _money = NumberFormat.currency(symbol: '₱', decimalDigits: 2);
   final _floatCtrl = TextEditingController();
@@ -103,7 +102,7 @@ class _MySalesScreenState extends State<MySalesScreen> {
             Expanded(
               child: Text('My sales today',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w800, color: _navy)),
+                      fontWeight: FontWeight.w800, color: context.palette.strong)),
             ),
             IconButton.filledTonal(
               tooltip: 'Refresh',
@@ -118,7 +117,7 @@ class _MySalesScreenState extends State<MySalesScreen> {
             style: Theme.of(context)
                 .textTheme
                 .bodySmall
-                ?.copyWith(color: _grey),
+                ?.copyWith(color: context.palette.muted),
           ),
           const SizedBox(height: 12),
           if (_error != null && sales == null) Text(_error!),
@@ -148,13 +147,13 @@ class _MySalesScreenState extends State<MySalesScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('I collected', style: TextStyle(color: _grey)),
+            Text('I collected', style: TextStyle(color: context.palette.muted)),
             const SizedBox(height: 4),
             Text(_money.format(s.mineTotal),
-                style: const TextStyle(
-                    fontSize: 30, fontWeight: FontWeight.w800, color: _navy)),
+                style: TextStyle(
+                    fontSize: 30, fontWeight: FontWeight.w800, color: context.palette.strong)),
             Text('${s.minePayments} payment${s.minePayments == 1 ? '' : 's'}',
-                style: const TextStyle(color: _grey)),
+                style: TextStyle(color: context.palette.muted)),
             const Divider(height: 24),
             for (final key in labels.keys)
               Padding(
@@ -177,19 +176,19 @@ class _MySalesScreenState extends State<MySalesScreen> {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(children: [
-          const Icon(Icons.storefront_outlined, color: _grey),
+          Icon(Icons.storefront_outlined, color: context.palette.muted),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Shop total today',
-                    style: TextStyle(color: _grey)),
+                Text('Shop total today',
+                    style: TextStyle(color: context.palette.muted)),
                 Text(_money.format(s.shopTotal),
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
-                        color: _navy)),
+                        color: context.palette.strong)),
               ],
             ),
           ),
@@ -224,12 +223,12 @@ class _MySalesScreenState extends State<MySalesScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Cash check',
-                style: TextStyle(fontWeight: FontWeight.w700, color: _navy)),
+            Text('Cash check',
+                style: TextStyle(fontWeight: FontWeight.w700, color: context.palette.strong)),
             const SizedBox(height: 4),
-            const Text(
+            Text(
               'Counts only the cash I collected today. Nothing here is saved.',
-              style: TextStyle(color: _grey, fontSize: 12),
+              style: TextStyle(color: context.palette.muted, fontSize: 12),
             ),
             const SizedBox(height: 12),
             TextField(

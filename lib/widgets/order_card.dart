@@ -90,7 +90,7 @@ class OrderCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w700,
-                              color: const Color(0xFF123047),
+                              color: context.palette.strong,
                             ),
                           ),
                         ),
@@ -118,10 +118,10 @@ class OrderCard extends StatelessWidget {
                         for (final item in order.items)
                           _Pill(
                             text: item.serviceName,
-                            color: const Color(0xFF123047),
+                            color: context.palette.strong,
                           ),
                         if (order.items.isEmpty)
-                          const _Pill(text: '—', color: Color(0xFF718096)),
+                          _Pill(text: '—', color: context.palette.muted),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -134,7 +134,7 @@ class OrderCard extends StatelessWidget {
                         const _FieldLabel('Status:'),
                         _Pill(
                           text: _statusText(),
-                          color: statusColor(order.status.asString),
+                          color: statusColorFor(context, order.status.asString),
                           strong: true,
                         ),
                         if (machineEndsAt != null)
@@ -172,7 +172,7 @@ class OrderCard extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontSize: 24,
                           fontWeight: FontWeight.w800,
-                          color: const Color(0xFF123047),
+                          color: context.palette.strong,
                         ),
                       ),
                     ),
@@ -253,8 +253,8 @@ class _FieldLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
         text,
-        style: const TextStyle(
-          color: Color(0xFF718096),
+        style: TextStyle(
+          color: context.palette.muted,
           fontSize: 11,
           fontWeight: FontWeight.w600,
         ),

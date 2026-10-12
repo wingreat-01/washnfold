@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 
 import '../models/staff.dart';
 import '../providers/service_catalog_provider.dart';
+import '../providers/theme_settings.dart';
 import '../services/supabase_service.dart';
+import '../theme/app_theme.dart';
 import 'services_screen.dart';
 import 'staff_screen.dart';
 import '../widgets/privacy_policy_link.dart';
@@ -103,6 +105,12 @@ class SettingsScreen extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: 28),
+              const _SectionLabel('Appearance'),
+              const Card(
+                margin: EdgeInsets.zero,
+                child: _ThemePicker(),
+              ),
               if (role.canManagePricing || role.canManageStaff) ...[
                 const SizedBox(height: 28),
                 const _SectionLabel('Shop'),
@@ -185,14 +193,54 @@ class _SectionLabel extends StatelessWidget {
         padding: const EdgeInsets.only(left: 4, bottom: 8),
         child: Text(
           text.toUpperCase(),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w700,
             letterSpacing: .6,
-            color: Color(0xFF718096),
+            color: context.palette.muted,
           ),
         ),
       );
+}
+
+/// Light / Dark / System switch. Applies immediately and is remembered on
+/// this device (see ThemeSettings).
+class _ThemePicker extends StatelessWidget {
+  const _ThemePicker();
+
+  @override
+  Widget build(BuildContext context) {
+    final mode = context.watch<ThemeSettings>().mode;
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: SizedBox(
+        width: double.infinity,
+        child: SegmentedButton<ThemeMode>(
+          showSelectedIcon: false,
+          segments: const [
+            ButtonSegment(
+              value: ThemeMode.system,
+              icon: Icon(Icons.brightness_auto_outlined),
+              label: Text('System'),
+            ),
+            ButtonSegment(
+              value: ThemeMode.light,
+              icon: Icon(Icons.light_mode_outlined),
+              label: Text('Light'),
+            ),
+            ButtonSegment(
+              value: ThemeMode.dark,
+              icon: Icon(Icons.dark_mode_outlined),
+              label: Text('Dark'),
+            ),
+          ],
+          selected: {mode},
+          onSelectionChanged: (selection) =>
+              context.read<ThemeSettings>().setMode(selection.first),
+        ),
+      ),
+    );
+  }
 }
 
 /// Asks for the password and the word DELETE before anything is removed.

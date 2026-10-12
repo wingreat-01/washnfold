@@ -1,18 +1,21 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config.dart';
 import 'models/staff.dart';
+import 'providers/theme_settings.dart';
 import 'screens/app_shell.dart';
 import 'screens/customer_tracking_screen.dart';
 import 'screens/customer_tracking_lookup_screen.dart';
 import 'screens/login_screen.dart';
 import 'services/supabase_service.dart';
 import 'theme/app_theme.dart';
+import 'url_strategy_stub.dart'
+    if (dart.library.js_interop) 'url_strategy_web.dart';
 import 'utils/app_errors.dart';
 
 Future<void> main() async {
@@ -21,13 +24,23 @@ Future<void> main() async {
   // Clean URLs on web (/track/xxxx instead of /#/track/xxxx) —
   // matters here since the tracking link is what's encoded in the QR code
   // and handed to customers.
-  usePathUrlStrategy();
+  configureUrlStrategy();
 
   await SupabaseService.instance.init(
     url: AppConfig.supabaseUrl,
     anonKey: AppConfig.supabaseAnonKey,
   );
-  runApp(const WashNFoldApp());
+
+  // Load the saved Light/Dark/System choice before the first frame so the app
+  // doesn't flash the wrong theme on startup.
+  final themeSettings = ThemeSettings();
+  await themeSettings.load();
+  runApp(
+    ChangeNotifierProvider<ThemeSettings>.value(
+      value: themeSettings,
+      child: const WashNFoldApp(),
+    ),
+  );
 }
 
 /// Two branches:
@@ -60,9 +73,11 @@ class WashNFoldApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'WashNFold',
+      title: 'Laundry Mate',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: context.watch<ThemeSettings>().mode,
       routerConfig: _router,
     );
   }

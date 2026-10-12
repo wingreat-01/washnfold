@@ -15,6 +15,7 @@ import '../widgets/order_card.dart';
 import '../widgets/order_qr_dialog.dart';
 import '../widgets/washer_picker.dart';
 import '../utils/app_errors.dart';
+import '../theme/app_theme.dart';
 
 /// The live queue. On wide screens (web/tablet) this shows every pipeline
 /// stage side by side, kanban-style, since that's where an owner watching
@@ -73,7 +74,7 @@ class _OrderQueueScreenState extends State<OrderQueueScreen> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 5),
                     child: Container(
-                      decoration: BoxDecoration(color: const Color(0xFFF8FAFD), borderRadius: BorderRadius.circular(16), border: Border.all(color: const Color(0xFFE7EDF4))),
+                      decoration: BoxDecoration(color: context.palette.surfaceAlt, borderRadius: BorderRadius.circular(16), border: Border.all(color: context.palette.border)),
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: _StatusColumn(status: status, provider: provider),
                     ),
@@ -136,11 +137,11 @@ class _OrderQueueScreenState extends State<OrderQueueScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(24),
                     child: Column(mainAxisSize: MainAxisSize.min, children: [
-                      Container(width: 64, height: 64, decoration: BoxDecoration(color: const Color(0xFFE8F1FC), borderRadius: BorderRadius.circular(20)), child: const Icon(Icons.checkroom_rounded, size: 30, color: Color(0xFF2677C9))),
+                      Container(width: 64, height: 64, decoration: BoxDecoration(color: context.palette.tintBlue, borderRadius: BorderRadius.circular(20)), child: Icon(Icons.checkroom_rounded, size: 30, color: context.palette.accent)),
                       const SizedBox(height: 14),
-                      Text('All clear in ${_selectedMobileStatus.label}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF123047))),
+                      Text('All clear in ${_selectedMobileStatus.label}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: context.palette.strong)),
                       const SizedBox(height: 5),
-                      const Text('New orders will show up here.', style: TextStyle(color: Color(0xFF718096))),
+                      Text('New orders will show up here.', style: TextStyle(color: context.palette.muted)),
                     ]),
                   ))
               : ListView.separated(
@@ -177,7 +178,7 @@ class _StatusColumn extends StatelessWidget {
             style: Theme.of(context)
                 .textTheme
                 .titleSmall
-                ?.copyWith(fontWeight: FontWeight.w800, color: const Color(0xFF123047)),
+                ?.copyWith(fontWeight: FontWeight.w800, color: context.palette.strong),
           ),
         ),
         Expanded(

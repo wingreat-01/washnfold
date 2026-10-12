@@ -49,3 +49,5 @@ flutter:
 
   assets:
     - assets/sounds/finished.wav
+    - assets/icon/logo.png
+    - assets/icon/wordmark.png

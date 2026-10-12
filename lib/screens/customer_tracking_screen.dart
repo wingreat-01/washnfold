@@ -88,7 +88,7 @@ class _CustomerTrackingScreenState extends State<CustomerTrackingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FA),
+      backgroundColor: context.isDark ? context.palette.canvas : const Color(0xFFF7F9FA),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -135,6 +135,8 @@ class _CustomerTrackingScreenState extends State<CustomerTrackingScreen> {
     final order = _status!;
     final isPickedUp = order.status == OrderStatus.pickedUp;
     final isReady = order.status == OrderStatus.ready;
+    final pickedUpColor =
+        context.isDark ? context.palette.muted : Colors.grey.shade700;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -145,7 +147,7 @@ class _CustomerTrackingScreenState extends State<CustomerTrackingScreen> {
           style: Theme.of(context)
               .textTheme
               .titleMedium
-              ?.copyWith(color: Colors.grey.shade600),
+              ?.copyWith(color: context.palette.muted),
         ),
         const SizedBox(height: 4),
         Text(
@@ -169,7 +171,7 @@ class _CustomerTrackingScreenState extends State<CustomerTrackingScreen> {
               children: [
                 Icon(
                   isPickedUp ? Icons.check_circle : Icons.local_laundry_service,
-                  color: isPickedUp ? Colors.grey.shade700 : const Color(0xFF2F9E5B),
+                  color: isPickedUp ? pickedUpColor : const Color(0xFF2F9E5B),
                   size: 40,
                 ),
                 const SizedBox(height: 10),
@@ -178,7 +180,7 @@ class _CustomerTrackingScreenState extends State<CustomerTrackingScreen> {
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: isPickedUp
-                            ? Colors.grey.shade700
+                            ? pickedUpColor
                             : const Color(0xFF2F9E5B),
                       ),
                 ),
@@ -220,7 +222,7 @@ class _CustomerTrackingScreenState extends State<CustomerTrackingScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(color: Colors.grey.shade600)),
+          Text(label, style: TextStyle(color: context.palette.muted)),
           Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
         ],
       ),
@@ -244,8 +246,10 @@ class _StatusStepper extends StatelessWidget {
         final isDone = i < currentIndex;
         final isCurrent = i == currentIndex;
         final color = isDone || isCurrent
-            ? statusColor(status.asString)
-            : Colors.grey.shade300;
+            ? statusColorFor(context, status.asString)
+            : (context.isDark
+                ? context.palette.borderStrong
+                : Colors.grey.shade300);
 
         return Row(
           children: [
@@ -256,7 +260,7 @@ class _StatusStepper extends StatelessWidget {
                   height: 24,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isDone || isCurrent ? color : Colors.white,
+                    color: isDone || isCurrent ? color : context.palette.surface,
                     border: Border.all(color: color, width: 2),
                   ),
                   child: isDone
@@ -275,8 +279,10 @@ class _StatusStepper extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
                   color: isDone || isCurrent
-                      ? Colors.black87
-                      : Colors.grey.shade500,
+                      ? Theme.of(context).colorScheme.onSurface
+                      : (context.isDark
+                          ? context.palette.subtle
+                          : Colors.grey.shade500),
                 ),
               ),
             ),

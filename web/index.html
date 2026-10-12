@@ -1,46 +1,574 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F5F7FA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1621" media="(prefers-color-scheme: dark)">
+<title>Laundry Mate</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* Palette mirrors lib/theme/app_theme.dart (AppPalette.light / AppPalette.dark) */
+:root{
+  --canvas:#F5F7FA; --surface:#FFFFFF; --alt:#F8FAFC; --border:#E5EBF2; --border2:#D8E2EC;
+  --strong:#123047; --body:#25364A; --muted:#718096; --subtle:#8795A7;
+  --accent:#2677C9; --on-accent:#FFFFFF; --teal:#16A6A1;
+  --tint-green:#E5F4EC; --tint-blue:#E8F1FC; --tint-purple:#F1EAFE; --tint-amber:#FFF1DA;
+  --err-bg:#FFF3F0; --err-icon:#B42318; --err-title:#912018; --err-text:#7A271A;
+  --ok-bg:#E5F4EC; --ok-text:#16845B; --pay:#2F9E5B;
+  --st-received:#64748B; --st-washing:#2677C9; --st-drying:#D97706;
+  --st-folding_pressing:#805AD5; --st-ready:#16845B; --st-picked_up:#475569;
+  --wait:#B7791F; --unpaid:#D32F2F; --rush:#E0A020;
+  --shadow:0 1px 2px #12304708;
+  --logo-filter:none;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --canvas:#0E1621; --surface:#16212E; --alt:#1B2838; --border:#263647; --border2:#32465A;
+    --strong:#E8EEF5; --body:#C9D4E0; --muted:#9AA9BA; --subtle:#7F8EA1;
+    --accent:#5AA2E8; --on-accent:#06223D; --teal:#2EC4BE;
+    --tint-green:#15372A; --tint-blue:#15304A; --tint-purple:#2A2142; --tint-amber:#3A2C12;
+    --err-bg:#3A1D19; --err-icon:#FDA29B; --err-title:#FECDCA; --err-text:#F4A9A0;
+    --ok-bg:#15372A; --ok-text:#34D399;
+    --st-received:#94A3B8; --st-washing:#5AA2E8; --st-drying:#F59E0B;
+    --st-folding_pressing:#B794F4; --st-ready:#34D399; --st-picked_up:#94A3B8;
+    --unpaid:#F87171; --shadow:none; --logo-filter:brightness(1.18) saturate(1.05);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --canvas:#0E1621; --surface:#16212E; --alt:#1B2838; --border:#263647; --border2:#32465A;
+  --strong:#E8EEF5; --body:#C9D4E0; --muted:#9AA9BA; --subtle:#7F8EA1;
+  --accent:#5AA2E8; --on-accent:#06223D; --teal:#2EC4BE;
+  --tint-green:#15372A; --tint-blue:#15304A; --tint-purple:#2A2142; --tint-amber:#3A2C12;
+  --err-bg:#3A1D19; --err-icon:#FDA29B; --err-title:#FECDCA; --err-text:#F4A9A0;
+  --ok-bg:#15372A; --ok-text:#34D399;
+  --st-received:#94A3B8; --st-washing:#5AA2E8; --st-drying:#F59E0B;
+  --st-folding_pressing:#B794F4; --st-ready:#34D399; --st-picked_up:#94A3B8;
+  --unpaid:#F87171; --shadow:none; --logo-filter:brightness(1.18) saturate(1.05);
+  color-scheme:dark;
+}
 
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;font-family:Roboto,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--body);background:var(--canvas);line-height:1.35;font-size:14px}
+.hidden{display:none!important}
+svg.i{width:22px;height:22px;fill:currentColor;flex:none}
+.logo,.wordmark{filter:var(--logo-filter);display:block}
 
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+/* ---------- buttons (FilledButton / OutlinedButton / TextButton) ---------- */
+button,input,select{font:inherit}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:12px 18px;border:1px solid transparent;border-radius:12px;background:var(--accent);color:var(--on-accent);font-weight:700;cursor:pointer;transition:filter .15s,background .15s}
+.btn:hover{filter:brightness(1.06)}
+.btn:disabled{opacity:.45;cursor:default;filter:none}
+.btn.full{width:100%}
+.btn.outline{background:transparent;color:var(--accent);border-color:var(--border2)}
+.btn.outline:hover{background:color-mix(in srgb,var(--accent) 8%,transparent);filter:none}
+.btn.pay{background:var(--pay);color:#fff}
+.btn.sm{min-height:0;padding:5px 12px;font-size:12.5px;border-radius:10px}
+.btn.text{background:none;color:var(--accent);min-height:40px;padding:8px 10px;border-color:transparent}
+.btn.text:hover{background:color-mix(in srgb,var(--accent) 8%,transparent);filter:none}
+.iconbtn{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:0;border-radius:50%;background:none;color:var(--muted);cursor:pointer}
+.iconbtn:hover{background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--strong)}
 
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
-  <base href="$FLUTTER_BASE_HREF">
+/* ---------- fields (InputDecoration: filled, 12px radius) ---------- */
+label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin:14px 0 6px}
+input,select{width:100%;padding:13px 14px;border:1px solid var(--border2);border-radius:12px;background:var(--alt);color:var(--strong);font-size:16px}
+input::placeholder{color:var(--subtle)}
+input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.pw{position:relative}
+.pw input{padding-right:48px}
+.pw .iconbtn{position:absolute;right:2px;top:50%;transform:translateY(-50%);width:42px;height:42px}
 
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+/* ---------- cards, pills, messages ---------- */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:16px;margin:0 0 12px;box-shadow:var(--shadow)}
+.card h3{margin:0 0 4px;font-size:16px;font-weight:700;color:var(--strong)}
+.sub{color:var(--muted);font-size:13px;margin:2px 0}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;color:var(--strong);background:color-mix(in srgb,var(--strong) 8%,transparent);white-space:nowrap}
+.pill.status{font-weight:700;color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent)}
+.pill.unpaid{font-size:11px;padding:3px 8px;color:var(--unpaid);background:color-mix(in srgb,var(--unpaid) 12%,transparent)}
+.pill.paid{font-size:11px;padding:3px 8px;color:var(--st-ready);background:color-mix(in srgb,var(--st-ready) 14%,transparent)}
+.msg{display:none;font-size:14px;margin:0 0 12px;padding:11px 14px;border-radius:12px;overflow-wrap:anywhere}
+.msg.err{display:block;background:var(--err-bg);color:var(--err-text)}
+.msg.ok{display:block;background:var(--ok-bg);color:var(--ok-text)}
+.empty{text-align:center;color:var(--muted);padding:34px 12px}
+.empty .ico{width:64px;height:64px;margin:0 auto 12px;border-radius:20px;background:var(--tint-blue);color:var(--accent);display:grid;place-items:center}
+.empty .ico svg{width:30px;height:30px}
 
-  <!-- iOS meta tags & icons -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="washnfold">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+/* ---------- login (screens/login_screen.dart) ---------- */
+.auth{min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px}
+.auth-in{width:100%;max-width:380px;display:flex;flex-direction:column;align-items:stretch}
+.auth .logo{height:88px;width:auto;margin:0 auto}
+.auth .wordmark{height:46px;width:auto;margin:12px auto 0;max-width:100%;object-fit:contain}
+.auth h2{margin:10px 0 22px;text-align:center;font-size:16px;font-weight:700;color:var(--strong)}
+.auth .forgot{align-self:flex-end;margin-top:2px}
+.auth .or{display:flex;align-items:center;gap:12px;margin:14px 0;color:var(--muted)}
+.auth .or::before,.auth .or::after{content:"";flex:1;height:1px;background:var(--border)}
+.auth .note{margin-top:6px;text-align:center;font-size:12px;color:var(--muted)}
+.auth .note a{color:var(--accent)}
+.auth .msg{margin:12px 0 0}
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+/* ---------- app shell: rail on wide, app bar + bottom nav on phones ---------- */
+#app{min-height:100%}
+.rail{display:none}
+.appbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 8px 8px 16px;padding-top:calc(8px + env(safe-area-inset-top,0px));background:var(--canvas)}
+.appbar .brand{display:flex;align-items:center;gap:10px;min-width:0}
+.appbar .logo{height:34px;width:auto}
+.appbar .wordmark{height:24px;width:auto}
+.appbar .acts{display:flex;align-items:center}
+.bottomnav{position:fixed;left:0;right:0;bottom:0;z-index:6;display:flex;height:calc(72px + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);background:var(--surface);border-top:1px solid var(--border)}
+.nav{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:0;background:none;color:var(--muted);font-size:11px;font-weight:500;cursor:pointer}
+.nav .pillbg{display:grid;place-items:center;width:64px;height:32px;border-radius:16px;transition:background .15s}
+.nav.on{color:var(--strong);font-weight:800}
+.nav.on .pillbg{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent)}
+.content{min-width:0}
+main{max-width:760px;margin:0 auto;padding:4px 14px calc(96px + env(safe-area-inset-bottom,0px))}
+.pagehead{padding:8px 2px 12px}
+.pagehead h1{margin:0;font-size:24px;font-weight:800;letter-spacing:-.3px;color:var(--strong)}
+.pagehead small{display:block;margin-top:2px;color:var(--muted);font-size:13px}
 
-  <title>washnfold</title>
-  <link rel="manifest" href="manifest.json">
+@media (min-width:900px){
+  #app:not(.hidden){display:flex}
+  .rail{display:flex;flex-direction:column;align-items:center;width:112px;flex:none;position:sticky;top:0;height:100vh;padding:16px 8px;background:var(--surface);border-right:1px solid var(--border)}
+  .rail .logo{height:46px;width:auto}
+  .rail .wordmark{width:96px;height:auto;margin-top:8px}
+  .rail .navs{display:flex;flex-direction:column;gap:6px;margin-top:22px;width:100%}
+  .rail .nav{flex:none;height:auto;padding:6px 0;border-radius:14px}
+  .rail .grow{flex:1}
+  .appbar,.bottomnav{display:none}
+  .content{flex:1}
+  main{max-width:none;padding:18px 22px 40px}
+  .pagehead{padding-top:0}
+}
+
+/* ---------- stats ---------- */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 14px}
+.stat{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:12px;min-width:0}
+.stat .ic{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex:none}
+.stat .ic svg{width:21px;height:21px}
+.stat.a .ic{background:var(--tint-blue);color:var(--accent)}
+.stat.r .ic{background:var(--tint-green);color:var(--st-ready)}
+.stat.s .ic{background:var(--tint-amber);color:var(--wait)}
+.stat b{display:block;font-size:20px;line-height:1.1;font-weight:800;color:var(--strong);overflow:hidden;text-overflow:ellipsis}
+.stat span{font-size:12px;color:var(--muted)}
+@media (max-width:420px){.stat{flex-direction:column;align-items:flex-start;gap:6px}}
+
+/* ---------- queue: stage chips (phone) / kanban (wide) ---------- */
+.chips{display:flex;gap:8px;overflow-x:auto;padding:0 0 10px;margin:0 0 4px;scrollbar-width:thin}
+.chip{flex:none;padding:8px 14px;border-radius:10px;border:1px solid var(--border2);background:transparent;color:var(--body);font-size:13.5px;font-weight:500;cursor:pointer;white-space:nowrap}
+.chip.on{background:color-mix(in srgb,var(--accent) 14%,transparent);border-color:transparent;color:var(--strong);font-weight:700}
+.board{display:grid;grid-template-columns:repeat(5,minmax(185px,1fr));gap:10px;overflow-x:auto;align-items:start;padding-bottom:6px}
+.col{background:var(--alt);border:1px solid var(--border);border-radius:16px;padding:8px}
+.col>header{display:flex;align-items:center;justify-content:space-between;padding:8px 6px 10px}
+.col>header b{font-size:14px;font-weight:800;color:var(--strong);display:flex;align-items:center;gap:8px}
+.col>header b::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--c)}
+.col>header span{font-size:12px;font-weight:700;color:var(--muted)}
+.col .none{padding:18px 6px;text-align:center;color:var(--subtle);font-size:13px}
+.col .card{margin:0 0 8px}
+
+.order{display:flex;gap:12px;align-items:flex-start;padding:14px;border-radius:14px}
+.order .main{flex:1;min-width:0}
+.order .name{font-size:16px;font-weight:700;color:var(--strong);display:flex;align-items:center;gap:6px;overflow-wrap:anywhere}
+.order .name svg{width:16px;height:16px;color:var(--rush)}
+.order .ref{margin-top:3px;font-size:12px;font-weight:600;color:var(--muted)}
+.order .line{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
+.order .lbl{font-size:11px;font-weight:600;color:var(--muted)}
+.order .when{margin-top:8px;font-size:12px;color:var(--subtle)}
+.order .side{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none}
+.order .total{font-size:24px;font-weight:800;color:var(--strong);letter-spacing:-.25px}
+.order .side select{width:auto;padding:5px 8px;font-size:12.5px;border-radius:10px}
+.order .payrow{display:flex;gap:6px;align-items:center}
+.order.compact{flex-direction:column;gap:8px}
+.order.compact .side{flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;width:100%}
+.order.compact .total{font-size:20px}
+
+/* ---------- new order ---------- */
+.svc{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--border)}
+.svc:first-of-type{border-top:0}
+.svc strong{color:var(--strong);font-weight:700}
+.svc input{width:96px;text-align:right;padding:10px 12px}
+.totalbar{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-weight:600}
+.totalbar .amt{font-size:24px;font-weight:800;color:var(--strong)}
+.newwrap{max-width:560px}
+</style>
 </head>
 <body>
-  <!--
-    You can customize the "flutter_bootstrap.js" script.
-    This is useful to provide a custom configuration to the Flutter loader
-    or to give the user feedback during the initialization process.
 
-    For more details:
-    * https://docs.flutter.dev/platform-integration/web/initialization
-  -->
-  <script src="flutter_bootstrap.js" async></script>
+<!-- icon sprite (Material-style glyphs matching the app's nav icons) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></symbol>
+  <symbol id="i-board" viewBox="0 0 24 24"><path d="M4 4h4.5a1 1 0 011 1v14a1 1 0 01-1 1H4a1 1 0 01-1-1V5a1 1 0 011-1zm5.5 0h5a1 1 0 011 1v8a1 1 0 01-1 1h-5V4zm6.5 0h4a1 1 0 011 1v11a1 1 0 01-1 1h-4V4z"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4a2 2 0 00-2 2v14a2 2 0 002 2h8v-2H4V5z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><path d="M12 7a5 5 0 100 10 5 5 0 000-10zM2 13h2v-2H2v2zm18 0h2v-2h-2v2zM11 2v2h2V2h-2zm0 18v2h2v-2h-2zM5.99 4.58L4.58 5.99l1.42 1.42 1.41-1.42-1.42-1.41zm12.37 12.37l-1.41 1.41 1.42 1.42 1.41-1.42-1.42-1.41zm1.42-10.95l-1.42-1.41-1.41 1.41 1.41 1.42 1.42-1.42zM7.41 17.95l-1.41-1.41-1.42 1.41 1.42 1.42 1.41-1.42z"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a9 9 0 109 9c0-.46-.04-.92-.1-1.36a5.39 5.39 0 01-4.4 2.26 5.4 5.4 0 01-5.4-5.4c0-1.81.89-3.42 2.26-4.4A9.2 9.2 0 0012 3z"/></symbol>
+  <symbol id="i-auto" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18V4a8 8 0 010 16z"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17a5 5 0 110-10 5 5 0 010 10zm0-8a3 3 0 100 6 3 3 0 000-6z"/></symbol>
+  <symbol id="i-eyeoff" viewBox="0 0 24 24"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46A11.8 11.8 0 001 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65a3 3 0 003 3c.22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53a5 5 0 01-5-5c0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16a3 3 0 00-3-3l-.17.01z"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 3a3 3 0 110 6 3 3 0 010-6zm0 14.2a7.2 7.2 0 01-6-3.22c.03-2 4-3.1 6-3.1s5.97 1.1 6 3.1a7.2 7.2 0 01-6 3.22z"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34.05-.08.07-.12C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15C12.96 17.55 11 21 11 21z"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M21 18v1a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v1h-9a2 2 0 00-2 2v8a2 2 0 002 2h9zm-9-2h10V8H12v8zm4-2.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"/></symbol>
+  <symbol id="i-shirt" viewBox="0 0 24 24"><path d="M16 4l4 2.5-1.5 4-2-.8V20H7.5v-10.3l-2 .8L4 6.5 8 4a4 4 0 008 0z"/></symbol>
+</svg>
+
+<!-- ============ SIGN IN ============ -->
+<div id="auth" class="auth hidden">
+  <div class="auth-in">
+    <img class="logo" src="logo.png" alt="">
+    <img class="wordmark" src="wordmark.png" alt="Laundry Mate">
+    <h2>Welcome back</h2>
+    <form id="login-form" style="display:flex;flex-direction:column">
+      <label for="email" style="margin-top:0">Email</label>
+      <input id="email" type="email" autocomplete="username" required>
+      <label for="password">Password</label>
+      <div class="pw">
+        <input id="password" type="password" autocomplete="current-password" required>
+        <button class="iconbtn" id="pw-toggle" type="button" aria-label="Show password"><svg class="i"><use href="#i-eye"/></svg></button>
+      </div>
+      <button class="btn text forgot" id="forgot-btn" type="button">Forgot password?</button>
+      <button class="btn full" id="login-btn" type="submit" style="margin-top:8px">Sign in</button>
+    </form>
+    <div class="or">or</div>
+    <button class="btn outline full" id="google-btn" type="button"><svg class="i"><use href="#i-user"/></svg>Continue with Google</button>
+    <div id="auth-msg" class="msg"></div>
+    <p class="note" style="margin-top:14px">Staff: sign in with the email and password your shop owner set up for you.</p>
+    <p class="note"><a href="/privacy/">Privacy Policy</a></p>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app" class="hidden">
+  <aside class="rail">
+    <img class="logo" src="logo.png" alt="">
+    <img class="wordmark" src="wordmark.png" alt="Laundry Mate">
+    <div class="navs">
+      <button class="nav" data-tab="new" type="button"><span class="pillbg"><svg class="i"><use href="#i-plus"/></svg></span>New order</button>
+      <button class="nav on" data-tab="orders" type="button"><span class="pillbg"><svg class="i"><use href="#i-board"/></svg></span>Queue</button>
+    </div>
+    <div class="grow"></div>
+    <button class="iconbtn theme-btn" type="button" aria-label="Theme"><svg class="i"><use href="#i-auto"/></svg></button>
+    <button class="iconbtn signout" type="button" aria-label="Sign out" title="Sign out"><svg class="i"><use href="#i-logout"/></svg></button>
+  </aside>
+
+  <div class="content">
+    <header class="appbar">
+      <div class="brand">
+        <img class="logo" src="logo.png" alt="">
+        <img class="wordmark" src="wordmark.png" alt="Laundry Mate">
+      </div>
+      <div class="acts">
+        <button class="iconbtn theme-btn" type="button" aria-label="Theme"><svg class="i"><use href="#i-auto"/></svg></button>
+        <button class="iconbtn signout" type="button" aria-label="Sign out" title="Sign out"><svg class="i"><use href="#i-logout"/></svg></button>
+      </div>
+    </header>
+
+    <main>
+      <div class="pagehead"><h1 id="title">Queue</h1><small id="who"></small></div>
+      <div id="msg" class="msg"></div>
+
+      <section id="view-orders">
+        <div class="stats">
+          <div class="stat a"><div class="ic"><svg class="i"><use href="#i-list"/></svg></div><div><b id="st-active">0</b><span>Active</span></div></div>
+          <div class="stat r"><div class="ic"><svg class="i"><use href="#i-check"/></svg></div><div><b id="st-ready">0</b><span>Ready</span></div></div>
+          <div class="stat s"><div class="ic"><svg class="i"><use href="#i-wallet"/></svg></div><div><b id="st-sales">₱0</b><span>Paid today</span></div></div>
+        </div>
+        <div class="chips" id="chips"></div>
+        <div id="orders"></div>
+      </section>
+
+      <section id="view-new" class="hidden">
+        <div class="newwrap">
+          <p class="sub" style="margin:0 0 12px">Select services and enter the customer details.</p>
+          <form id="order-form">
+            <div class="card">
+              <h3>Customer</h3>
+              <label for="cname">Customer name</label>
+              <input id="cname" list="clist" autocomplete="off" required>
+              <datalist id="clist"></datalist>
+              <label for="cphone">Phone (optional, for new customers)</label>
+              <input id="cphone" type="tel" autocomplete="off">
+            </div>
+            <div class="card"><h3>Enter weight or quantity</h3><div id="svc-list"></div></div>
+            <div class="card" id="addon-card"><h3>Add-ons</h3><div id="addon-list"></div></div>
+            <div class="card totalbar"><span>Total</span><span class="amt" id="total">₱0.00</span></div>
+            <button class="btn full" id="save-btn" type="submit">Save order</button>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="bottomnav">
+    <button class="nav" data-tab="new" type="button"><span class="pillbg"><svg class="i"><use href="#i-plus"/></svg></span>New order</button>
+    <button class="nav on" data-tab="orders" type="button"><span class="pillbg"><svg class="i"><use href="#i-board"/></svg></span>Queue</button>
+  </nav>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const SUPABASE_URL = 'https://dietefbjoywhmebwzhww.supabase.co';
+// Public anon key only. Never put a service_role key in this page.
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZXRlZmJqb3l3aG1lYnd6aHd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNzE3NjAsImV4cCI6MjEwNjg0Nzc2MH0.HgVdhqoifW0nJs9jdLkspT4gfggrkmCzJazy71LSouY';
+
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+});
+
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => [...document.querySelectorAll(s)];
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const peso = (n) => '₱' + Number(n || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const peso0 = (n) => '₱' + Number(n || 0).toLocaleString('en-PH', { maximumFractionDigits: 0 });
+const STATUSES = ['received', 'washing', 'drying', 'folding_pressing', 'ready', 'picked_up'];
+const PIPELINE = STATUSES.slice(0, 5);
+const LABEL = { received: 'Received', washing: 'Washing', drying: 'Drying', folding_pressing: 'Folding', ready: 'Ready', picked_up: 'Picked up' };
+const REF_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+const icon = (id) => `<svg class="i"><use href="#i-${id}"/></svg>`;
+const wide = window.matchMedia('(min-width:900px)');
+
+let staff = null, orders = [], services = [], customers = [], filter = 'board', channel = null, poll = null, started = false;
+
+function note(el, text, type) { el.textContent = text; el.className = 'msg ' + (type || ''); }
+function toast(text, type = 'ok') { note($('#msg'), text, type); if (type === 'ok') setTimeout(() => note($('#msg'), '', ''), 3500); }
+function show(which) { $('#auth').classList.toggle('hidden', which !== 'auth'); $('#app').classList.toggle('hidden', which !== 'app'); }
+
+/* ---------- theme: system / light / dark, remembered on this device ---------- */
+const THEMES = ['auto', 'light', 'dark'];
+let theme = 'auto';
+try { theme = THEMES.includes(localStorage.getItem('theme_mode')) ? localStorage.getItem('theme_mode') : 'auto'; } catch (_) {}
+function applyTheme() {
+  if (theme === 'auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.dataset.theme = theme;
+  const g = theme === 'auto' ? 'auto' : theme === 'light' ? 'sun' : 'moon';
+  $$('.theme-btn').forEach((b) => { b.innerHTML = icon(g); b.title = 'Theme: ' + (theme === 'auto' ? 'follow device' : theme); });
+}
+$$('.theme-btn').forEach((b) => b.addEventListener('click', () => {
+  theme = THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length];
+  try { localStorage.setItem('theme_mode', theme); } catch (_) {}
+  applyTheme();
+}));
+applyTheme();
+
+/* ---------- auth (same Supabase Auth users as the mobile app) ---------- */
+$('#login-form').addEventListener('submit', async (e) => {
+  e.preventDefault(); note($('#auth-msg'), '', '');
+  $('#login-btn').disabled = true;
+  const { error } = await db.auth.signInWithPassword({ email: $('#email').value.trim(), password: $('#password').value });
+  $('#login-btn').disabled = false;
+  if (error) note($('#auth-msg'), 'Could not sign in. Check your credentials.', 'err');
+});
+$('#pw-toggle').addEventListener('click', () => {
+  const p = $('#password'); const showing = p.type === 'text';
+  p.type = showing ? 'password' : 'text';
+  $('#pw-toggle').innerHTML = icon(showing ? 'eye' : 'eyeoff');
+  $('#pw-toggle').setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+});
+$('#google-btn').addEventListener('click', async () => {
+  const { error } = await db.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } });
+  if (error) note($('#auth-msg'), error.message, 'err');
+});
+$('#forgot-btn').addEventListener('click', async () => {
+  const email = $('#email').value.trim();
+  if (!email || !email.includes('@')) return note($('#auth-msg'), 'Type your email above first, then tap "Forgot password?".', 'err');
+  const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: location.origin + '/reset-password/' });
+  note($('#auth-msg'), error ? "Couldn't send the reset email. Wait a minute and try again." : `If an account exists for ${email}, a reset link is on its way. Check your inbox (and spam folder).`, error ? 'err' : 'ok');
+});
+$$('.signout').forEach((b) => b.addEventListener('click', () => db.auth.signOut()));
+
+db.auth.onAuthStateChange((_evt, session) => {
+  if (session) start(session.user); else stop();
+});
+
+function stop() {
+  started = false; staff = null; orders = [];
+  if (channel) { db.removeChannel(channel); channel = null; }
+  clearInterval(poll); show('auth');
+}
+
+async function start(user) {
+  if (started) return; started = true;
+  const { data: row, error } = await db.from('staff').select('id,shop_id,name,role,active').eq('user_id', user.id).maybeSingle();
+  if (error || !row || row.active === false) {
+    show('auth'); started = false;
+    note($('#auth-msg'), row && row.active === false ? 'This staff account is turned off.' : 'No shop is linked to this account yet. Create your shop in the Laundry Mate app first.', 'err');
+    await db.auth.signOut(); return;
+  }
+  staff = row;
+  const { data: shop } = await db.from('shops').select('name').eq('id', row.shop_id).maybeSingle();
+  $('#who').textContent = [shop?.name, row.name, row.role].filter(Boolean).join(' · ');
+  show('app');
+  await Promise.all([loadServices(), loadCustomers(), loadOrders()]);
+  channel = db.channel('orders-' + row.shop_id)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: 'shop_id=eq.' + row.shop_id }, loadOrders)
+    .subscribe();
+  poll = setInterval(loadOrders, 30000);
+}
+
+/* ---------- orders ---------- */
+async function loadOrders() {
+  if (!staff) return;
+  const { data, error } = await db.from('orders').select('*, order_items(*)').eq('shop_id', staff.shop_id).order('created_at', { ascending: false }).limit(300);
+  if (error) return toast('Could not load orders: ' + error.message, 'err');
+  orders = data || [];
+  const midnight = new Date(); midnight.setHours(0, 0, 0, 0);
+  const { data: pays } = await db.from('payments').select('amount,order_id').gte('paid_at', midnight.toISOString());
+  const mine = new Set(orders.map((o) => o.id));
+  const sales = (pays || []).filter((p) => mine.has(p.order_id)).reduce((s, p) => s + Number(p.amount), 0);
+  $('#st-sales').textContent = peso0(sales);
+  renderOrders();
+}
+
+const byStage = (k) => orders.filter((o) => o.status === k);
+// Wide screens show the kanban board; phones show one stage at a time (like the app).
+function effFilter() {
+  if (wide.matches) return PIPELINE.includes(filter) ? 'board' : filter;
+  return filter === 'board' ? 'received' : filter;
+}
+
+function renderOrders() {
+  const f = effFilter();
+  $('#st-active').textContent = orders.filter((o) => o.status !== 'picked_up').length;
+  $('#st-ready').textContent = byStage('ready').length;
+
+  const unpaidCount = orders.filter((o) => o.payment_status !== 'paid').length;
+  const chips = wide.matches
+    ? [['board', 'Board'], ['unpaid', `Unpaid (${unpaidCount})`], ['done', 'Picked up']]
+    : [...PIPELINE.map((k) => [k, `${LABEL[k]} (${byStage(k).length})`]), ['unpaid', `Unpaid (${unpaidCount})`], ['done', 'Picked up']];
+  $('#chips').innerHTML = chips.map(([k, l]) => `<button type="button" class="chip ${f === k ? 'on' : ''}" data-f="${k}">${l}</button>`).join('');
+
+  if (f === 'board') {
+    $('#orders').innerHTML = `<div class="board">${PIPELINE.map((k) => {
+      const list = byStage(k);
+      return `<section class="col" style="--c:var(--st-${k})"><header><b>${LABEL[k]}</b><span>${list.length}</span></header>${list.length ? list.map((o) => orderCard(o, true)).join('') : '<div class="none">No orders</div>'}</section>`;
+    }).join('')}</div>`;
+    return;
+  }
+  const list = f === 'unpaid' ? orders.filter((o) => o.payment_status !== 'paid') : f === 'done' ? byStage('picked_up') : byStage(f);
+  $('#orders').innerHTML = list.length ? list.map((o) => orderCard(o, false)).join('')
+    : `<div class="empty"><div class="ico">${icon('shirt')}</div>No orders here.</div>`;
+}
+
+function orderCard(o, compact) {
+  const next = STATUSES[STATUSES.indexOf(o.status) + 1];
+  const items = (o.order_items || []).map((i) => `<span class="pill">${esc(i.service_name)} × ${Number(i.quantity)}</span>`).join('') || '<span class="pill">—</span>';
+  const when = new Date(o.created_at).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  const paid = o.payment_status === 'paid';
+  return `<div class="card order ${compact ? 'compact' : ''}" data-id="${o.id}">
+    <div class="main">
+      <div class="name">${esc(o.customer_name)}${o.is_rush ? icon('bolt') : ''}</div>
+      <div class="ref">Ref: ${esc(o.public_reference || '—')}</div>
+      <div class="line"><span class="lbl">Service:</span>${items}</div>
+      <div class="line"><span class="lbl">Status:</span><span class="pill status" style="--c:var(--st-${esc(o.status)})">${LABEL[o.status] || esc(o.status)}</span>${paid ? '<span class="pill paid">Paid</span>' : `<span class="pill unpaid">${o.pay_later ? 'Unpaid · pay at pickup' : 'Unpaid'}</span>`}</div>
+      <div class="when">${when}</div>
+    </div>
+    <div class="side">
+      <div class="total">${peso0(o.total)}</div>
+      ${paid ? '' : `<div class="payrow"><select data-role="method" aria-label="Payment method"><option value="cash">Cash</option><option value="gcash">GCash</option><option value="maya">Maya</option><option value="card">Card</option></select><button class="btn pay sm" type="button" data-act="pay">Pay</button></div>`}
+      ${next ? `<button class="btn outline sm" type="button" data-act="next">→ ${LABEL[next]}</button>` : ''}
+    </div></div>`;
+}
+
+$('#chips').addEventListener('click', (e) => { const f = e.target.closest('[data-f]')?.dataset.f; if (f) { filter = f; renderOrders(); } });
+wide.addEventListener('change', renderOrders);
+
+$('#orders').addEventListener('click', async (e) => {
+  const btn = e.target.closest('[data-act]'); if (!btn) return;
+  const act = btn.dataset.act;
+  const card = btn.closest('[data-id]'); const o = orders.find((x) => x.id === card.dataset.id); if (!o) return;
+  btn.disabled = true;
+  try {
+    if (act === 'next') {
+      const status = STATUSES[STATUSES.indexOf(o.status) + 1];
+      const patch = { status };
+      if (status === 'ready') patch.ready_at = new Date().toISOString();
+      if (status === 'picked_up') patch.picked_up_at = new Date().toISOString();
+      const { error } = await db.from('orders').update(patch).eq('id', o.id); if (error) throw error;
+    } else {
+      const method = card.querySelector('[data-role=method]').value;
+      const { error: e1 } = await db.from('payments').insert({ order_id: o.id, method, amount: o.total, paid_at: new Date().toISOString() }); if (e1) throw e1;
+      const { error: e2 } = await db.from('orders').update({ payment_status: 'paid' }).eq('id', o.id); if (e2) throw e2;
+    }
+    await loadOrders();
+  } catch (err) { toast(err.message || 'Could not update the order.', 'err'); btn.disabled = false; }
+});
+
+/* ---------- new order ---------- */
+async function loadServices() {
+  const { data } = await db.from('services').select('*').eq('shop_id', staff.shop_id).eq('active', true).order('name');
+  services = data || [];
+  const row = (s) => `<div class="svc"><div><strong>${esc(s.name)}</strong><div class="sub">${esc(summary(s))}</div></div><input type="number" min="0" step="${s.unit === 'piece' ? 1 : 0.1}" inputmode="decimal" placeholder="${s.unit === 'piece' ? 'pcs' : 'kg'}" data-sid="${s.id}"></div>`;
+  $('#svc-list').innerHTML = services.filter((s) => !s.is_add_on).map(row).join('') || '<div class="sub">No services yet. Add them in the app.</div>';
+  const add = services.filter((s) => s.is_add_on);
+  $('#addon-card').classList.toggle('hidden', !add.length);
+  $('#addon-list').innerHTML = add.map(row).join('');
+}
+async function loadCustomers() {
+  const { data } = await db.from('customers').select('id,name,phone').eq('shop_id', staff.shop_id).order('name');
+  customers = data || [];
+  $('#clist').innerHTML = customers.map((c) => `<option value="${esc(c.name)}">`).join('');
+}
+const hasTier = (s) => s.unit === 'kg' && !s.is_add_on && s.max_kg > 0 && s.max_kg_price != null;
+const summary = (s) => hasTier(s) ? `${peso(s.max_kg_price)} up to ${Number(s.max_kg)} kg, then ${peso(s.max_kg_price / s.max_kg)} per extra kg` : `${peso(s.price)} per ${s.unit === 'piece' ? 'piece' : 'kg'}`;
+function priceFor(s, q) {
+  if (q <= 0) return 0;
+  if (!hasTier(s)) return q * Number(s.price);
+  return q <= s.max_kg ? Number(s.max_kg_price) : Number(s.max_kg_price) + (q - s.max_kg) * (s.max_kg_price / s.max_kg);
+}
+const round2 = (n) => Math.round(n * 100) / 100;
+function lines() {
+  return [...document.querySelectorAll('#order-form [data-sid]')].map((i) => ({ s: services.find((x) => x.id === i.dataset.sid), q: parseFloat(i.value) || 0 })).filter((l) => l.s && l.q > 0);
+}
+$('#order-form').addEventListener('input', () => { $('#total').textContent = peso(lines().reduce((t, l) => t + round2(priceFor(l.s, l.q)), 0)); });
+
+const newRef = () => 'WF-' + Array.from({ length: 6 }, () => REF_ALPHABET[crypto.getRandomValues(new Uint32Array(1))[0] % REF_ALPHABET.length]).join('');
+
+$('#order-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const ls = lines(); const name = $('#cname').value.trim();
+  if (!name) return toast('Enter a customer name.', 'err');
+  if (!ls.length) return toast('Add at least one service.', 'err');
+  $('#save-btn').disabled = true;
+  try {
+    let cust = customers.find((c) => c.name.toLowerCase() === name.toLowerCase());
+    if (!cust) {
+      const { data, error } = await db.from('customers').insert({ shop_id: staff.shop_id, name, phone: $('#cphone').value.trim() || null }).select('id,name,phone').single();
+      if (error) throw error; cust = data; customers.push(cust);
+    }
+    const total = round2(ls.reduce((t, l) => t + round2(priceFor(l.s, l.q)), 0));
+    let order = null;
+    for (let attempt = 0; attempt < 8 && !order; attempt++) {
+      const { data, error } = await db.from('orders').insert({
+        shop_id: staff.shop_id, customer_id: cust.id, customer_name: cust.name, staff_id: staff.id,
+        status: 'received', payment_status: 'unpaid', is_rush: false, rush_surcharge: 0, total, public_reference: newRef()
+      }).select('id').single();
+      if (!error) order = data;
+      else if (!(error.code === '23505' && String(error.message).includes('public_reference'))) throw error;
+    }
+    if (!order) throw new Error('Could not create a unique order number. Try again.');
+    const { error: ie } = await db.from('order_items').insert(ls.map((l) => ({ order_id: order.id, service_id: l.s.id, service_name: l.s.name, quantity: l.q, subtotal: round2(priceFor(l.s, l.q)) })));
+    if (ie) { await db.from('orders').delete().eq('id', order.id); throw ie; }
+    $('#order-form').reset(); $('#total').textContent = peso(0);
+    $('#clist').innerHTML = customers.map((c) => `<option value="${esc(c.name)}">`).join('');
+    tab('orders'); await loadOrders(); toast('Order saved.');
+  } catch (err) { toast(err.message || 'Could not save the order.', 'err'); }
+  $('#save-btn').disabled = false;
+});
+
+/* ---------- tabs (rail on wide screens, bottom bar on phones) ---------- */
+function tab(name) {
+  $('#view-orders').classList.toggle('hidden', name !== 'orders');
+  $('#view-new').classList.toggle('hidden', name !== 'new');
+  $('#title').textContent = name === 'orders' ? 'Queue' : 'New order';
+  $$('.nav').forEach((b) => b.classList.toggle('on', b.dataset.tab === name));
+}
+$$('.nav').forEach((b) => b.addEventListener('click', () => tab(b.dataset.tab)));
+
+db.auth.getSession().then(({ data }) => { if (!data.session) show('auth'); });
+</script>
 </body>
 </html>

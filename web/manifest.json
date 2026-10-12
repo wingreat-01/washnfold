@@ -1,6 +1,6 @@
 {
-    "name": "washnfold",
-    "short_name": "washnfold",
+    "name": "Laundry Mate",
+    "short_name": "Laundry Mate",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

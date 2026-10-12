@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../theme/app_theme.dart';
 
 const _doneGreen = Color(0xFF2F9E5B);
 
@@ -195,7 +196,9 @@ class _MachineTimerPillState extends State<MachineTimerPill> {
   Widget build(BuildContext context) {
     final remaining = widget.endsAt.difference(DateTime.now());
     final done = remaining <= Duration.zero;
-    final color = done ? _doneGreen : const Color(0xFF1E6FB8);
+    final color = done
+        ? _doneGreen
+        : (context.isDark ? const Color(0xFF5AA2E8) : const Color(0xFF1E6FB8));
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(

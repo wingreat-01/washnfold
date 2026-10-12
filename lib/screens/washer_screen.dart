@@ -15,6 +15,7 @@ import '../widgets/machine_alert_host.dart';
 import '../widgets/machine_timer.dart';
 import '../widgets/tile_columns_menu.dart';
 import '../utils/app_errors.dart';
+import '../theme/app_theme.dart';
 
 const _availableColor = Color(0xFF2F9E5B);
 const _inUseColor = Color(0xFFD32F2F); // red = busy
@@ -358,7 +359,7 @@ class _FilterChip extends StatelessWidget {
         label: Text(label),
         selected: selected,
         selectedColor: color.withOpacity(0.18),
-        side: BorderSide(color: selected ? color : Colors.black12),
+        side: BorderSide(color: selected ? color : context.palette.borderStrong),
         labelStyle: TextStyle(
           color: selected ? color : null,
           fontWeight: FontWeight.w600,
@@ -484,7 +485,7 @@ class _WasherCard extends StatelessWidget {
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontFamily: 'monospace',
                   fontSize: 10,
-                  color: Colors.black54,
+                  color: context.palette.muted,
                 ),
               ),
             const SizedBox(height: 4),
@@ -536,7 +537,7 @@ class _WasherCard extends StatelessWidget {
 
     return Card(
       clipBehavior: Clip.antiAlias,
-      color: Color.alphaBlend(color.withOpacity(0.06), Colors.white),
+      color: Color.alphaBlend(color.withOpacity(context.isDark ? 0.16 : 0.06), context.palette.surface),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
         side: BorderSide(color: color.withOpacity(0.5), width: 1.5),
@@ -626,7 +627,7 @@ class _WasherCard extends StatelessWidget {
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontFamily: 'monospace',
                       fontSize: 11.5,
-                      color: Colors.black54,
+                      color: context.palette.muted,
                     ),
                   ),
                 ],
@@ -701,7 +702,7 @@ class _WasherCard extends StatelessWidget {
 
     return Card(
       clipBehavior: Clip.antiAlias,
-      color: Color.alphaBlend(color.withOpacity(0.06), Colors.white),
+      color: Color.alphaBlend(color.withOpacity(context.isDark ? 0.16 : 0.06), context.palette.surface),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(color: color.withOpacity(0.5), width: 1.5),
@@ -717,15 +718,15 @@ class _WasherCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
                       color: color.withOpacity(0.15),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(Icons.local_laundry_service,
-                        color: color, size: 22),
+                        color: color, size: 20),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -740,33 +741,26 @@ class _WasherCard extends StatelessWidget {
                         if (cap != null)
                           Text(
                             '${cap == cap.roundToDouble() ? cap.toInt() : cap} kg',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodySmall,
                           ),
                       ],
                     ),
                   ),
                   const SizedBox(width: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.14),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(_iconFor(washer.status), size: 14, color: color),
-                        const SizedBox(width: 4),
-                        Text(
-                          washer.status.label,
-                          style: TextStyle(
-                            color: color,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
+                  // Icon-only status badge. A text pill ("Available") took so
+                  // much width that the name and kg were squeezed on phones.
+                  Tooltip(
+                    message: washer.status.label,
+                    child: Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.14),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(_iconFor(washer.status),
+                          size: 18, color: color),
                     ),
                   ),
                 ],

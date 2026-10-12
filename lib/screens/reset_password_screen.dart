@@ -23,6 +23,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
   bool _loading = false;
+  bool _showPassword = false;
+  bool _showConfirmPassword = false;
   String? _error;
 
   @override
@@ -87,16 +89,28 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   const SizedBox(height: 24),
                   TextField(
                     controller: _passwordController,
-                    obscureText: true,
-                    decoration:
-                        const InputDecoration(labelText: 'New password'),
+                    obscureText: !_showPassword,
+                    decoration: InputDecoration(
+                      labelText: 'New password',
+                      suffixIcon: IconButton(
+                        tooltip: _showPassword ? 'Hide password' : 'Show password',
+                        icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility),
+                        onPressed: () => setState(() => _showPassword = !_showPassword),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 12),
                   TextField(
                     controller: _confirmController,
-                    obscureText: true,
-                    decoration:
-                        const InputDecoration(labelText: 'Confirm new password'),
+                    obscureText: !_showConfirmPassword,
+                    decoration: InputDecoration(
+                      labelText: 'Confirm new password',
+                      suffixIcon: IconButton(
+                        tooltip: _showConfirmPassword ? 'Hide password' : 'Show password',
+                        icon: Icon(_showConfirmPassword ? Icons.visibility_off : Icons.visibility),
+                        onPressed: () => setState(() => _showConfirmPassword = !_showConfirmPassword),
+                      ),
+                    ),
                     onSubmitted: (_) => _loading ? null : _save(),
                   ),
                   if (_error != null) ...[

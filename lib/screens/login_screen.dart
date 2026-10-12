@@ -25,6 +25,8 @@ class _LoginScreenState extends State<LoginScreen> {
   // Create account is the first thing people see.
   bool _createMode = true;
   bool _loading = false;
+  bool _showPassword = false;
+  bool _showConfirmPassword = false;
   String? _error;
   String? _info;
 
@@ -196,15 +198,31 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Image.asset('assets/icon/logo.png', height: 88),
+                Image.asset(
+                  'assets/icon/logo.png',
+                  height: 88,
+                  // Never show Flutter's red-X box if the logo is missing.
+                  errorBuilder: (_, __, ___) => Icon(
+                    Icons.local_laundry_service_rounded,
+                    size: 88,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
                 const SizedBox(height: 12),
-                Text(
-                  'WashNFold',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineMedium
-                      ?.copyWith(fontWeight: FontWeight.w700),
+                Image.asset(
+                  'assets/icon/wordmark.png',
+                  height: 46,
+                  fit: BoxFit.contain,
+                  semanticLabel: 'Laundry Mate',
+                  // Falls back to plain text if the image is missing.
+                  errorBuilder: (_, __, ___) => Text(
+                    'Laundry Mate',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineMedium
+                        ?.copyWith(fontWeight: FontWeight.w700),
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -235,8 +253,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 12),
                 TextField(
                   controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(labelText: 'Password'),
+                  obscureText: !_showPassword,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    suffixIcon: IconButton(
+                      tooltip: _showPassword ? 'Hide password' : 'Show password',
+                      icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility),
+                      onPressed: () => setState(() => _showPassword = !_showPassword),
+                    ),
+                  ),
                   onSubmitted: (_) => _createMode ? null : _submit(),
                 ),
                 if (!_createMode)
@@ -251,9 +276,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 12),
                   TextField(
                     controller: _confirmController,
-                    obscureText: true,
-                    decoration:
-                        const InputDecoration(labelText: 'Confirm password'),
+                    obscureText: !_showConfirmPassword,
+                    decoration: InputDecoration(
+                      labelText: 'Confirm password',
+                      suffixIcon: IconButton(
+                        tooltip: _showConfirmPassword ? 'Hide password' : 'Show password',
+                        icon: Icon(_showConfirmPassword ? Icons.visibility_off : Icons.visibility),
+                        onPressed: () => setState(() => _showConfirmPassword = !_showConfirmPassword),
+                      ),
+                    ),
                     onSubmitted: (_) => _submit(),
                   ),
                 ],

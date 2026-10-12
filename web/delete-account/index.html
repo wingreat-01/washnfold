@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#1769e0">
-  <meta name="description" content="Permanently delete your WashNFold account and its data.">
-  <title>Delete Your Account | WashNFold</title>
+  <meta name="description" content="Permanently delete your Laundry Mate account and its data.">
+  <title>Delete Your Account | Laundry Mate</title>
   <style>
     :root { color-scheme: light; --blue:#1769e0; --red:#c62828; --ink:#172033; --muted:#657086; --line:#e1e7f0; --bg:#f4f7fb; }
     * { box-sizing:border-box; }
@@ -43,7 +43,7 @@
 <main>
   <header class="brand">
     <div class="logo" aria-hidden="true">◉</div>
-    <h1>Delete your WashNFold account</h1>
+    <h1>Delete your Laundry Mate account</h1>
     <p class="sub">Sign in to confirm it's you, then permanently delete your account.</p>
   </header>
 
@@ -102,7 +102,7 @@
   // Public anon key only. Never put a service_role key in this page.
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZXRlZmJqb3l3aG1lYnd6aHd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNzE3NjAsImV4cCI6MjEwNjg0Nzc2MH0.HgVdhqoifW0nJs9jdLkspT4gfggrkmCzJazy71LSouY';
   // Optional: your support address, shown for people who can't sign in. Leave '' to hide.
-  const SUPPORT_EMAIL = '';
+  const SUPPORT_EMAIL = 'laundrymate@prohubapps.com';
 
   const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: { persistSession: false, autoRefreshToken: false }
@@ -116,7 +116,7 @@
   if (SUPPORT_EMAIL) {
     $('#support').classList.remove('hidden');
     $('#support-link').textContent = SUPPORT_EMAIL;
-    $('#support-link').href = 'mailto:' + SUPPORT_EMAIL + '?subject=WashNFold%20account%20deletion';
+    $('#support-link').href = 'mailto:' + SUPPORT_EMAIL + '?subject=Laundry%20Mate%20account%20deletion';
   }
 
   signinForm.addEventListener('submit', async (e) => {

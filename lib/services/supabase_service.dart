@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart' show LaunchMode;
 
 import '../config.dart';
 import '../models/order_queue_info.dart';
@@ -42,6 +43,10 @@ class SupabaseService {
     await client.auth.signInWithOAuth(
       OAuthProvider.google,
       redirectTo: kIsWeb ? Uri.base.origin : AppConfig.mobileAuthRedirect,
+      // On Android use the real system browser (it has the Google session and
+      // reliably hands the custom-scheme deep link back to the app).
+      authScreenLaunchMode:
+          kIsWeb ? LaunchMode.platformDefault : LaunchMode.externalApplication,
     );
   }
 
