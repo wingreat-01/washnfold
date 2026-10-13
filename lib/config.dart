@@ -13,6 +13,10 @@ class AppConfig {
     defaultValue: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZXRlZmJqb3l3aG1lYnd6aHd3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNzE3NjAsImV4cCI6MjEwNjg0Nzc2MH0.HgVdhqoifW0nJs9jdLkspT4gfggrkmCzJazy71LSouY',
   );
 
+  /// Where people write to subscribe after the free trial. Change this to
+  /// your real support address.
+  static const supportEmail = 'laundrymate@prohubapps.com';
+
   /// The public URL this web app is deployed at, used to build the
   /// customer-facing tracking links encoded in each order's QR code.
   /// Pass your real domain once deployed:

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config.dart';
+import 'models/shop_access.dart';
 import 'models/staff.dart';
 import 'providers/currency_settings.dart';
 import 'providers/theme_settings.dart';
@@ -13,11 +14,13 @@ import 'screens/app_shell.dart';
 import 'screens/customer_tracking_screen.dart';
 import 'screens/customer_tracking_lookup_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/trial_ended_screen.dart';
 import 'services/supabase_service.dart';
 import 'theme/app_theme.dart';
 import 'url_strategy_stub.dart'
     if (dart.library.js_interop) 'url_strategy_web.dart';
 import 'utils/app_errors.dart';
+import 'widgets/trial_banner.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -104,6 +107,7 @@ class _RootGate extends StatefulWidget {
 class _RootGateState extends State<_RootGate> {
   String? _shopId;
   Staff? _staff; // the signed-in user's own staff row (role, active flag)
+  ShopAccess? _access; // 30-day trial / subscription status from the server
   bool _resolvingShop = false;
   String? _error;
   StreamSubscription<AuthState>? _authSub;
@@ -145,6 +149,7 @@ class _RootGateState extends State<_RootGate> {
       final staff = await SupabaseService.instance.fetchCurrentStaff();
       _staff = staff;
       _shopId = staff?.shopId;
+      _access = staff == null ? null : await _loadAccess();
     } catch (e) {
       logDebug('resolveShop failed: $e');
       _staff = null;
@@ -152,6 +157,18 @@ class _RootGateState extends State<_RootGate> {
       _error = friendlyError(e, fallback: 'Please check your connection and try again.');
     } finally {
       if (mounted) setState(() => _resolvingShop = false);
+    }
+  }
+
+  /// Reads the trial / subscription status. If it can't be read (offline, or
+  /// the SQL in supabase/trial_30_days.sql hasn't been run) the app stays
+  /// usable; the database itself still refuses new orders once a trial is over.
+  Future<ShopAccess?> _loadAccess() async {
+    try {
+      return await SupabaseService.instance.fetchShopAccess();
+    } catch (e) {
+      logDebug('load shop access failed: $e');
+      return null;
     }
   }
 
@@ -173,6 +190,9 @@ class _RootGateState extends State<_RootGate> {
       if (latest.active != _staff!.active || latest.role != _staff!.role) {
         setState(() => _staff = latest);
       }
+      // Also refresh the trial status so the app locks as soon as it ends.
+      final access = await _loadAccess();
+      if (mounted && access != null) setState(() => _access = access);
     } catch (e) {
       logDebug('recheck staff failed: $e'); // offline: try again next tick
     }
@@ -191,6 +211,7 @@ class _RootGateState extends State<_RootGate> {
           setState(() {
             _shopId = null;
             _staff = null;
+            _access = null;
             _error = null;
           });
         }
@@ -338,6 +359,32 @@ class _RootGateState extends State<_RootGate> {
       );
     }
 
-    return AppShell(shopId: _shopId!, role: _staff!.role);
+    // Trial over and no subscription: lock the app.
+    final access = _access;
+    if (access != null && !access.hasAccess) {
+      return TrialEndedScreen(
+        isOwner: _staff!.role == StaffRole.owner,
+        onRefresh: _resolveShop,
+      );
+    }
+
+    final shell = AppShell(shopId: _shopId!, role: _staff!.role);
+    if (access != null && access.onTrial) {
+      return Column(
+        children: [
+          TrialBanner(daysLeft: access.trialDaysLeft),
+          // The banner already sits under the status bar, so the app below it
+          // must not pad for it a second time.
+          Expanded(
+            child: MediaQuery.removePadding(
+              context: context,
+              removeTop: true,
+              child: shell,
+            ),
+          ),
+        ],
+      );
+    }
+    return shell;
   }
 }

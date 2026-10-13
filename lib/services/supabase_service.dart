@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart' show LaunchMode;
 import '../config.dart';
 import '../models/order_queue_info.dart';
 import '../models/public_order_status.dart';
+import '../models/shop_access.dart';
 import '../models/sales_today.dart';
 import '../models/staff.dart';
 
@@ -148,6 +149,16 @@ class SupabaseService {
         .maybeSingle()
         .timeout(const Duration(seconds: 10));
     return row == null ? null : Staff.fromJson(row);
+  }
+
+  /// Trial / subscription status of the signed-in user's shop, read from the
+  /// server (see supabase/trial_30_days.sql). Null if nothing comes back.
+  Future<ShopAccess?> fetchShopAccess() async {
+    final res = await client
+        .rpc('get_shop_access')
+        .timeout(const Duration(seconds: 10));
+    if (res is! List || res.isEmpty) return null;
+    return ShopAccess.fromJson(Map<String, dynamic>.from(res.first as Map));
   }
 
   /// All staff of a shop, owner first. Visible to the owner via the Staff tab.
