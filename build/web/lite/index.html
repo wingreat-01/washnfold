@@ -196,33 +196,6 @@ main{max-width:760px;margin:0 auto;padding:4px 14px calc(96px + env(safe-area-in
 .totalbar{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-weight:600}
 .totalbar .amt{font-size:24px;font-weight:800;color:var(--strong)}
 .newwrap{max-width:560px}
-.rail .navs{overflow-y:auto}
-.bottomnav .nav{min-width:0;padding:0 2px;font-size:10px;line-height:1.15;text-align:center}
-.bottomnav .pillbg{width:44px}
-.machines{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px}
-.mach{margin:0}
-.mach .mname{font-size:17px;font-weight:800;color:var(--strong)}
-.mach .mload{margin-top:10px;color:var(--body)}
-.mach .mload strong{color:var(--strong)}
-.timer{display:inline-block;margin-top:6px;padding:4px 12px;border-radius:20px;font-weight:800;font-size:13px;color:var(--st-washing);background:color-mix(in srgb,var(--st-washing) 14%,transparent)}
-.timer.done{color:var(--st-ready);background:color-mix(in srgb,var(--st-ready) 16%,transparent)}
-.mact{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:12px}
-.mach .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.mact select{flex:1 1 100%;min-width:0;width:auto;padding:6px 8px;font-size:13px;border-radius:10px}
-.stats.four{grid-template-columns:repeat(4,1fr)}
-@media (max-width:700px){.stats.four{grid-template-columns:repeat(2,1fr)}}
-.stat.p .ic{background:var(--tint-purple);color:var(--st-folding_pressing)}
-.stat b{font-size:18px}
-.seg{display:inline-flex;border:1px solid var(--border2);border-radius:12px;overflow:hidden;margin:0 0 10px}
-.seg button{border:0;background:transparent;color:var(--body);padding:9px 18px;font-weight:600;cursor:pointer}
-.seg button.on{background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--strong);font-weight:800}
-.dates{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 14px}
-.dates>div{flex:1;min-width:150px;max-width:240px}
-.h2{margin:18px 0 8px;font-size:17px;font-weight:800;color:var(--strong)}
-.bar{height:6px;border-radius:3px;background:var(--tint-blue);margin-top:6px}.bar i{display:block;height:100%;border-radius:3px;background:var(--accent)}
-.lrow{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--border)}
-.lrow:first-child{border-top:0}.lrow b{color:var(--strong)}
-.foot{font-size:12px;color:var(--subtle);margin-top:12px}
 </style>
 </head>
 <body>
@@ -243,10 +216,6 @@ main{max-width:760px;margin:0 auto;padding:4px 14px calc(96px + env(safe-area-in
   <symbol id="i-check" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></symbol>
   <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M21 18v1a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v1h-9a2 2 0 00-2 2v8a2 2 0 002 2h9zm-9-2h10V8H12v8zm4-2.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"/></symbol>
   <symbol id="i-shirt" viewBox="0 0 24 24"><path d="M16 4l4 2.5-1.5 4-2-.8V20H7.5v-10.3l-2 .8L4 6.5 8 4a4 4 0 008 0z"/></symbol>
-  <symbol id="i-washer" viewBox="0 0 24 24"><path d="M18 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2zM7 4a1 1 0 110 2 1 1 0 010-2zm3 0a1 1 0 110 2 1 1 0 010-2zm2 16a6 6 0 110-12 6 6 0 010 12zm0-10a4 4 0 00-2.83 6.83l5.66-5.66A4 4 0 0012 10z"/></symbol>
-  <symbol id="i-dryer" viewBox="0 0 24 24"><path d="M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2zm3 2.5a1 1 0 100 2 1 1 0 000-2zm3 0a1 1 0 100 2 1 1 0 000-2zM12 9a5.5 5.5 0 100 11 5.5 5.5 0 000-11zm0 2a3.5 3.5 0 110 7 3.5 3.5 0 010-7z"/></symbol>
-  <symbol id="i-dash" viewBox="0 0 24 24"><path d="M3 3h8v10H3V3zm10 0h8v6h-8V3zM3 15h8v6H3v-6zm10-4h8v10h-8V11z"/></symbol>
-  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zm5.6 8H19v6h-2.8v-6z"/></symbol>
 </svg>
 
 <!-- ============ SIGN IN ============ -->
@@ -279,7 +248,10 @@ main{max-width:760px;margin:0 auto;padding:4px 14px calc(96px + env(safe-area-in
   <aside class="rail">
     <img class="logo" src="logo.png" alt="">
     <img class="wordmark" src="wordmark.png" alt="Laundry Mate">
-    <div class="navs" id="rail-nav"></div>
+    <div class="navs">
+      <button class="nav" data-tab="new" type="button"><span class="pillbg"><svg class="i"><use href="#i-plus"/></svg></span>New order</button>
+      <button class="nav on" data-tab="orders" type="button"><span class="pillbg"><svg class="i"><use href="#i-board"/></svg></span>Queue</button>
+    </div>
     <div class="grow"></div>
     <button class="iconbtn theme-btn" type="button" aria-label="Theme"><svg class="i"><use href="#i-auto"/></svg></button>
     <button class="iconbtn signout" type="button" aria-label="Sign out" title="Sign out"><svg class="i"><use href="#i-logout"/></svg></button>
@@ -330,25 +302,13 @@ main{max-width:760px;margin:0 auto;padding:4px 14px calc(96px + env(safe-area-in
           </form>
         </div>
       </section>
-
-      <section id="view-washers" class="hidden"><div class="machines" id="washers-list"></div></section>
-      <section id="view-dryers" class="hidden"><div class="machines" id="dryers-list"></div></section>
-
-      <section id="view-dash" class="hidden">
-        <p class="sub" style="margin:0 0 12px">Here’s how your laundry business is doing.</p>
-        <div id="dash"></div>
-      </section>
-
-      <section id="view-sales" class="hidden">
-        <p class="sub" style="margin:0 0 12px">Review sales and order value over time.</p>
-        <div class="seg" id="seg"><button type="button" data-p="daily" class="on">Daily</button><button type="button" data-p="weekly">Weekly</button><button type="button" data-p="custom">Custom</button></div>
-        <div class="dates"><div><label id="sd1l" for="sd1" style="margin-top:0">Report date</label><input type="date" id="sd1"></div><div id="sd2w" class="hidden"><label for="sd2" style="margin-top:0">End date</label><input type="date" id="sd2"></div></div>
-        <div id="sales"></div>
-      </section>
     </main>
   </div>
 
-  <nav class="bottomnav" id="bottom-nav"></nav>
+  <nav class="bottomnav">
+    <button class="nav" data-tab="new" type="button"><span class="pillbg"><svg class="i"><use href="#i-plus"/></svg></span>New order</button>
+    <button class="nav on" data-tab="orders" type="button"><span class="pillbg"><svg class="i"><use href="#i-board"/></svg></span>Queue</button>
+  </nav>
 </div>
 
 <script type="module">
@@ -374,8 +334,7 @@ const REF_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 const icon = (id) => `<svg class="i"><use href="#i-${id}"/></svg>`;
 const wide = window.matchMedia('(min-width:900px)');
 
-let staff = null, orders = [], services = [], customers = [], filter = 'board', channel = null, poll = null, tick = null, started = false, curTab = 'orders';
-const machines = { washers: [], dryers: [] };
+let staff = null, orders = [], services = [], customers = [], filter = 'board', channel = null, poll = null, started = false;
 
 function note(el, text, type) { el.textContent = text; el.className = 'msg ' + (type || ''); }
 function toast(text, type = 'ok') { note($('#msg'), text, type); if (type === 'ok') setTimeout(() => note($('#msg'), '', ''), 3500); }
@@ -430,7 +389,7 @@ db.auth.onAuthStateChange((_evt, session) => {
 function stop() {
   started = false; staff = null; orders = [];
   if (channel) { db.removeChannel(channel); channel = null; }
-  clearInterval(poll); clearInterval(tick); show('auth');
+  clearInterval(poll); show('auth');
 }
 
 async function start(user) {
@@ -444,15 +403,12 @@ async function start(user) {
   staff = row;
   const { data: shop } = await db.from('shops').select('name').eq('id', row.shop_id).maybeSingle();
   $('#who').textContent = [shop?.name, row.name, row.role].filter(Boolean).join(' · ');
-  show('app'); buildNav(); tab('orders');
-  await Promise.all([loadServices(), loadCustomers(), loadOrders(), loadMachines()]);
+  show('app');
+  await Promise.all([loadServices(), loadCustomers(), loadOrders()]);
   channel = db.channel('orders-' + row.shop_id)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: 'shop_id=eq.' + row.shop_id }, loadOrders)
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'washers', filter: 'shop_id=eq.' + row.shop_id }, loadMachines)
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'dryers', filter: 'shop_id=eq.' + row.shop_id }, loadMachines)
     .subscribe();
-  poll = setInterval(() => { loadOrders(); loadMachines(); if (curTab === 'dash') loadDash(); }, 30000);
-  tick = setInterval(renderMachines, 20000);
+  poll = setInterval(loadOrders, 30000);
 }
 
 /* ---------- orders ---------- */
@@ -605,163 +561,14 @@ $('#order-form').addEventListener('submit', async (e) => {
   $('#save-btn').disabled = false;
 });
 
-/* ---------- washers & dryers ---------- */
-const CYCLE = { washers: 45, dryers: 60 };
-const MLABEL = { available: 'Available', in_use: 'In use', maintenance: 'Maintenance' };
-const FREE = { status: 'available', current_order_id: null, started_at: null, ends_at: null };
-const natSort = (a) => a.sort((x, y) => { const n = (s) => +((s.name.match(/\d+/) || [])[0] || NaN); const nx = n(x), ny = n(y); return nx && ny && nx !== ny ? nx - ny : x.name.localeCompare(y.name); });
-const cyc = (m, k) => m.cycle_minutes || CYCLE[k];
-const washOnly = (o) => { const n = (o.order_items || []).map((i) => String(i.service_name || '').toLowerCase()); return n.some((s) => s.includes('wash')) && !n.some((s) => /dry|fold|full/.test(s)); };
-async function loadMachines() {
-  if (!staff) return;
-  const [w, d] = await Promise.all(['washers', 'dryers'].map((k) => db.from(k).select('*').eq('shop_id', staff.shop_id)));
-  machines.washers = natSort(w.data || []); machines.dryers = natSort(d.data || []);
-  renderMachines();
-}
-function timeLeft(m, k) {
-  if (m.status !== 'in_use') return '';
-  const end = m.ends_at ? new Date(m.ends_at) : m.started_at ? new Date(new Date(m.started_at).getTime() + cyc(m, k) * 60000) : null;
-  if (!end) return '';
-  const ms = end - Date.now();
-  return ms <= 0 ? 'Done' : Math.ceil(ms / 60000) + ' min left';
-}
-function machineCard(k, m) {
-  const isW = k === 'washers';
-  const o = m.current_order_id ? orders.find((x) => x.id === m.current_order_id) : null;
-  const c = m.status === 'available' ? 'ready' : m.status === 'maintenance' ? 'received' : isW ? 'washing' : 'drying';
-  const tl = timeLeft(m, k);
-  const opt = (x) => `<option value="${x.id}">${esc(x.customer_name || x.name)}${x.public_reference ? ' · ' + esc(x.public_reference) : ''}</option>`;
-  let body = '', acts = '';
-  if (m.status === 'in_use') {
-    body = `<div class="mload"><strong>${esc(o ? o.customer_name : 'Order')}</strong>${o ? ' · ' + esc(o.public_reference || '') : ''}</div>${tl ? `<span class="timer ${tl === 'Done' ? 'done' : ''}">${tl}</span>` : ''}`;
-    if (isW) {
-      const free = machines.dryers.filter((d) => d.status === 'available');
-      acts = (free.length && o ? `<select data-role="dryer" aria-label="Dryer">${free.map((d) => `<option value="${d.id}">${esc(d.name)}</option>`).join('')}</select><button class="btn sm" type="button" data-mact="todry">→ Dryer</button>` : '') + '<button class="btn outline sm" type="button" data-mact="release">Release</button>';
-    } else acts = '<button class="btn sm" type="button" data-mact="fold">Send to folding</button>';
-  } else if (m.status === 'available') {
-    if (isW) {
-      const used = new Set(machines.washers.map((w) => w.current_order_id).filter(Boolean));
-      const el = orders.filter((x) => (x.status === 'received' || x.status === 'washing') && !used.has(x.id)).sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-      acts = el.length ? `<select data-role="order" aria-label="Order">${el.map(opt).join('')}</select><button class="btn sm" type="button" data-mact="assign">Assign</button>` : '<span class="sub">No orders waiting</span>';
-    } else body = '<div class="sub" style="margin-top:10px">Load it from a washer with “→ Dryer”.</div>';
-    acts += '<button class="btn outline sm" type="button" data-mact="maint">Maintenance</button>';
-  } else acts = '<button class="btn sm" type="button" data-mact="avail">Set available</button>';
-  const meta = [m.capacity_kg ? Number(m.capacity_kg) + ' kg' : '', m.notes].filter(Boolean).map(esc).join(' · ');
-  return `<div class="card mach" data-kind="${k}" data-id="${m.id}"><div class="row"><span class="mname">${esc(m.name)}</span><span class="pill status" style="--c:var(--st-${c})">${MLABEL[m.status] || esc(m.status)}</span></div>${meta ? `<div class="sub">${meta}</div>` : ''}${body}<div class="mact">${acts}</div></div>`;
-}
-function renderMachines() {
-  if (document.activeElement && document.activeElement.tagName === 'SELECT' && document.activeElement.closest('.mach')) return;
-  for (const k of ['washers', 'dryers']) {
-    $('#' + k + '-list').innerHTML = machines[k].length ? machines[k].map((m) => machineCard(k, m)).join('') : `<div class="empty">No ${k} yet. Add them in the app.</div>`;
-  }
-}
-async function take(k, id, orderId, mins) {
-  const now = new Date();
-  const { data, error } = await db.from(k).update({ status: 'in_use', current_order_id: orderId, started_at: now.toISOString(), ends_at: new Date(now.getTime() + mins * 60000).toISOString() }).eq('id', id).eq('status', 'available').select();
-  if (error) throw error; if (!data.length) throw new Error('That machine is no longer available.');
-}
-const freeUp = async (k, id) => { const { error } = await db.from(k).update(FREE).eq('id', id); if (error) throw error; };
-const setOrder = async (id, patch) => { const { error } = await db.from('orders').update(patch).eq('id', id); if (error) throw error; };
-async function machineAction(act, k, m, sel) {
-  const o = m.current_order_id ? orders.find((x) => x.id === m.current_order_id) : null;
-  if (act === 'assign') {
-    const ord = orders.find((x) => x.id === sel('order')); if (!ord) throw new Error('Pick an order first.');
-    await take('washers', m.id, ord.id, cyc(m, k));
-    if (ord.status === 'received') await setOrder(ord.id, { status: 'washing' });
-    toast(`${ord.customer_name} → ${m.name}`);
-  } else if (act === 'todry') {
-    const d = machines.dryers.find((x) => x.id === sel('dryer')); if (!d || !o) throw new Error('Pick a dryer first.');
-    await take('dryers', d.id, o.id, cyc(d, 'dryers'));
-    try { await freeUp('washers', m.id); await setOrder(o.id, { status: 'drying' }); } catch (err) { await freeUp('dryers', d.id).catch(() => {}); throw err; }
-    toast(`${o.customer_name} → ${d.name}`);
-  } else if (act === 'release') {
-    const finish = o && washOnly(o) && ['received', 'washing'].includes(o.status);
-    if (!confirm(finish ? `${o.customer_name}'s wash is finished. ${m.name} becomes Available and the order moves to Ready.` : `Take ${o ? o.customer_name : 'this load'} out of ${m.name}? The order stays in the queue.`)) return;
-    await freeUp('washers', m.id);
-    if (finish) await setOrder(o.id, { status: 'ready', ready_at: new Date().toISOString() });
-  } else if (act === 'fold') {
-    if (!confirm(o ? `${o.customer_name}'s order moves to Folding and ${m.name} becomes Available.` : `${m.name} will be marked Available.`)) return;
-    await freeUp('dryers', m.id);
-    if (o) await setOrder(o.id, { status: 'folding_pressing' });
-  } else {
-    const { error } = await db.from(k).update({ status: act === 'maint' ? 'maintenance' : 'available' }).eq('id', m.id); if (error) throw error;
-  }
-}
-$('main').addEventListener('click', async (e) => {
-  const btn = e.target.closest('[data-mact]'); if (!btn) return;
-  const card = btn.closest('.mach'); const k = card.dataset.kind; const m = machines[k].find((x) => x.id === card.dataset.id); if (!m) return;
-  const sel = (r) => card.querySelector(`[data-role=${r}]`)?.value;
-  btn.blur(); btn.disabled = true;
-  try { await machineAction(btn.dataset.mact, k, m, sel); } catch (err) { toast(err.message || 'That did not work. Please try again.', 'err'); }
-  await Promise.all([loadMachines(), loadOrders()]);
-});
-
-/* ---------- dashboard (owner) ---------- */
-const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
-const ymd = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-const pd = (s) => new Date(s + 'T00:00:00');
-const fdate = (d) => d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
-const tile = (cls, ic, val, lbl) => `<div class="stat ${cls}"><div class="ic">${icon(ic)}</div><div><b>${val}</b><span>${lbl}</span></div></div>`;
-async function loadDash() {
-  if (!staff) return;
-  const now = new Date(), som = new Date(now.getFullYear(), now.getMonth(), 1), sod = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const sow = addDays(sod, -((sod.getDay() + 6) % 7));
-  const { data, error } = await db.from('orders').select('*, order_items(*)').eq('shop_id', staff.shop_id).gte('created_at', som.toISOString());
-  if (error) { $('#dash').innerHTML = `<div class="msg err">Couldn't load the dashboard. ${esc(error.message)}</div>`; return; }
-  const os = data || [];
-  const sum = (since) => os.filter((o) => o.payment_status === 'paid' && new Date(o.created_at) > since).reduce((t, o) => t + Number(o.total), 0);
-  const counts = {}; os.forEach((o) => (o.order_items || []).forEach((i) => { counts[i.service_name] = (counts[i.service_name] || 0) + 1; }));
-  const top = Object.entries(counts).sort((a, b) => b[1] - a[1]); const max = top[0] ? top[0][1] : 1;
-  $('#dash').innerHTML = `<div class="stats four">${tile('r', 'wallet', peso(sum(sod)), 'Today')}${tile('a', 'wallet', peso(sum(sow)), 'This week')}${tile('p', 'wallet', peso(sum(som)), 'This month')}${tile('s', 'list', orders.filter((o) => o.status !== 'picked_up').length, 'Active orders')}</div>
-    <div class="h2">Top services this month</div><div class="card">${top.length ? top.map(([n, c]) => `<div class="lrow"><div style="flex:1"><b>${esc(n)}</b><div class="bar"><i style="width:${Math.round(c / max * 100)}%"></i></div></div><b>${c} orders</b></div>`).join('') : '<div class="empty" style="padding:14px">No service activity yet. Your most popular services will appear here.</div>'}</div>`;
-}
-
-/* ---------- sales reports (owner) ---------- */
-let period = 'daily';
-function salesRange() {
-  const day = pd($('#sd1').value || ymd(new Date()));
-  if (period === 'daily') return [day, addDays(day, 1)];
-  if (period === 'weekly') { const s = addDays(day, -((day.getDay() + 6) % 7)); return [s, addDays(s, 7)]; }
-  let b = pd($('#sd2').value || ymd(new Date())); if (b < day) b = day; return [day, addDays(b, 1)];
-}
-async function loadSales() {
-  if (!staff) return;
-  if (!$('#sd1').value) $('#sd1').value = $('#sd2').value = ymd(new Date());
-  $('#sd1l').textContent = period === 'custom' ? 'Start date' : period === 'weekly' ? 'Any day in the week' : 'Report date';
-  $('#sd2w').classList.toggle('hidden', period !== 'custom');
-  $$('#seg button').forEach((b) => b.classList.toggle('on', b.dataset.p === period));
-  const [a, b] = salesRange();
-  const { data, error } = await db.from('orders').select('*, order_items(*)').eq('shop_id', staff.shop_id).gte('created_at', a.toISOString()).lt('created_at', b.toISOString()).order('created_at', { ascending: false }).limit(1000);
-  if (error) { $('#sales').innerHTML = `<div class="msg err">${esc(error.message)}</div>`; return; }
-  const os = data || [];
-  const tot = (f) => os.filter(f).reduce((t, o) => t + Number(o.total), 0);
-  const svc = {}, cnt = {};
-  os.forEach((o) => (o.order_items || []).forEach((i) => { const n = String(i.service_name || '').trim() || 'Other services'; svc[n] = (svc[n] || 0) + Number(i.subtotal); cnt[n] = (cnt[n] || 0) + 1; }));
-  const rows = Object.entries(svc).sort((x, y) => y[1] - x[1]);
-  $('#sales').innerHTML = `<div class="sub" style="font-weight:600;margin-bottom:8px">${fdate(a)}${period === 'daily' ? '' : ' – ' + fdate(addDays(b, -1))}</div>
-    <div class="stats four">${tile('r', 'wallet', peso(tot(() => true)), 'Order value')}${tile('a', 'list', os.length, 'Orders created')}${tile('p', 'check', peso(tot((o) => o.payment_status === 'paid')), 'Paid order value')}${tile('s', 'wallet', peso(tot((o) => o.payment_status !== 'paid')), 'Outstanding')}</div>
-    <div class="h2">Sales by service</div><div class="card">${rows.length ? rows.map(([n, v]) => `<div class="lrow"><div><b>${esc(n)}</b><div class="sub">${cnt[n]} line items</div></div><b>${peso(v)}</b></div>`).join('') : '<div class="empty" style="padding:14px">No service sales for this period.</div>'}</div>
-    <div class="h2">Orders</div><div class="card">${os.length ? os.map((o) => `<div class="lrow"><div><b>${esc(o.customer_name)}</b><div class="sub">${esc(o.public_reference || '')} • ${new Date(o.created_at).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}<br>${o.payment_status === 'paid' ? 'Paid' : 'Unpaid'} · ${LABEL[o.status] || esc(o.status)}</div></div><b>${peso(o.total)}</b></div>`).join('') : '<div class="empty" style="padding:14px">No orders found for these dates.</div>'}</div>
-    <div class="foot">Order value is based on order creation date. Paid and outstanding figures reflect each order’s current payment status, not payment date.</div>`;
-}
-$('#seg').addEventListener('click', (e) => { const p = e.target.dataset.p; if (p) { period = p; loadSales(); } });
-$('#sd1').addEventListener('change', loadSales); $('#sd2').addEventListener('change', loadSales);
-
-/* ---------- tabs: left rail on wide screens, bottom bar on phones ---------- */
-const TABS = [['new', 'New order', 'plus', 'New order'], ['orders', 'Queue', 'board', 'Queue'], ['washers', 'Washers', 'washer', 'Washers'], ['dryers', 'Dryers', 'dryer', 'Dryers'], ['dash', 'Dashboard', 'dash', 'Shop overview', 1], ['sales', 'Sales reports', 'chart', 'Sales reports', 1]];
-function buildNav() {
-  const owner = staff && staff.role === 'owner';
-  const html = TABS.filter((t) => !t[4] || owner).map(([k, l, i]) => `<button class="nav" data-tab="${k}" type="button"><span class="pillbg">${icon(i)}</span>${l}</button>`).join('');
-  $('#rail-nav').innerHTML = html; $('#bottom-nav').innerHTML = html;
-}
+/* ---------- tabs (rail on wide screens, bottom bar on phones) ---------- */
 function tab(name) {
-  curTab = name;
-  $$('[id^="view-"]').forEach((s) => s.classList.toggle('hidden', s.id !== 'view-' + name));
-  $('#title').textContent = TABS.find((t) => t[0] === name)[3];
+  $('#view-orders').classList.toggle('hidden', name !== 'orders');
+  $('#view-new').classList.toggle('hidden', name !== 'new');
+  $('#title').textContent = name === 'orders' ? 'Queue' : 'New order';
   $$('.nav').forEach((b) => b.classList.toggle('on', b.dataset.tab === name));
-  if (name === 'washers' || name === 'dryers') loadMachines(); else if (name === 'dash') loadDash(); else if (name === 'sales') loadSales();
 }
-document.addEventListener('click', (e) => { const b = e.target.closest('.nav[data-tab]'); if (b) tab(b.dataset.tab); });
+$$('.nav').forEach((b) => b.addEventListener('click', () => tab(b.dataset.tab)));
 
 db.auth.getSession().then(({ data }) => { if (!data.session) show('auth'); });
 </script>
