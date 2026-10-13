@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Laundry Mate — Run your laundry shop from one screen</title>
+<meta name="description" content="Laundry Mate handles order intake, the wash-to-pickup queue, washer and dryer timers, payments and sales reports, on your phone and in your browser.">
+<meta name="theme-color" content="#F5F7FA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1621" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Laundry Mate">
+<meta property="og:description" content="Order intake, queue, washers and dryers, payments and reports for your laundry shop.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://laundrymate.prohubapps.com/landing/logo.png">
+<link rel="icon" type="image/png" href="/landing/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* Palette mirrors the app (lib/theme/app_theme.dart) */
+:root{
+  --canvas:#F5F7FA; --surface:#FFFFFF; --alt:#F8FAFC; --border:#E5EBF2; --border2:#D8E2EC;
+  --strong:#123047; --body:#25364A; --muted:#5F6F84; --accent:#2677C9; --on-accent:#FFFFFF;
+  --tint-blue:#E8F1FC; --tint-green:#E5F4EC; --tint-purple:#F1EAFE; --tint-amber:#FFF1DA;
+  --c-received:#64748B; --c-washing:#2677C9; --c-drying:#D97706; --c-folding:#805AD5; --c-ready:#16845B; --unpaid:#D32F2F;
+  --shadow:0 10px 30px #12304712; --logo-filter:none; color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --canvas:#0E1621; --surface:#16212E; --alt:#1B2838; --border:#263647; --border2:#32465A;
+  --strong:#E8EEF5; --body:#C9D4E0; --muted:#9AA9BA; --accent:#5AA2E8; --on-accent:#06223D;
+  --tint-blue:#15304A; --tint-green:#15372A; --tint-purple:#2A2142; --tint-amber:#3A2C12;
+  --c-received:#94A3B8; --c-washing:#5AA2E8; --c-drying:#F59E0B; --c-folding:#B794F4; --c-ready:#34D399; --unpaid:#F87171;
+  --shadow:none; --logo-filter:brightness(1.18) saturate(1.05); color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;font-family:Roboto,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;font-size:16px;line-height:1.55;color:var(--body);background:var(--canvas)}
+img{max-width:100%}
+a{color:var(--accent)}
+.wrap{width:100%;max-width:1120px;margin:0 auto;padding:0 20px}
+.hidden{display:none!important}
+.brand-img{filter:var(--logo-filter);display:block}
+:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 55%,transparent);outline-offset:2px;border-radius:8px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:12px 22px;border-radius:12px;border:1px solid transparent;background:var(--accent);color:var(--on-accent);font:inherit;font-weight:700;text-decoration:none;cursor:pointer;transition:filter .15s,transform .15s}
+.btn:hover{filter:brightness(1.07)}
+.btn:active{transform:translateY(1px)}
+.btn.outline{background:transparent;color:var(--accent);border-color:var(--border2)}
+.btn.outline:hover{background:color-mix(in srgb,var(--accent) 8%,transparent);filter:none}
+.btn.sm{min-height:40px;padding:8px 16px;font-size:14px}
+.btn svg{width:20px;height:20px;fill:currentColor}
+
+/* header */
+header.top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--canvas) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:64px}
+.bar .wordmark{height:30px;width:auto}
+.bar nav{display:flex;align-items:center;gap:22px}
+.bar nav a.l{color:var(--body);text-decoration:none;font-weight:500;font-size:15px}
+.bar nav a.l:hover{color:var(--accent)}
+@media (max-width:760px){.bar nav a.l{display:none}}
+
+/* hero */
+.hero{padding:56px 0 40px}
+.hero .grid{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center}
+.hero h1{margin:0 0 16px;font-size:clamp(34px,5vw,54px);line-height:1.08;font-weight:900;letter-spacing:-1.2px;color:var(--strong)}
+.hero h1 span{color:var(--accent)}
+.hero p.lead{margin:0 0 26px;font-size:18px;color:var(--muted);max-width:34em}
+.cta{display:flex;flex-wrap:wrap;gap:12px}
+.fine{margin-top:14px;font-size:13px;color:var(--muted)}
+@media (max-width:900px){.hero{padding-top:32px}.hero .grid{grid-template-columns:1fr}}
+
+/* queue mock (illustration) */
+.mock{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:16px;box-shadow:var(--shadow)}
+.mock .mh{display:flex;align-items:center;gap:10px;margin:2px 4px 12px}
+.mock .mh img{height:28px;width:auto}
+.mock .mh b{font-size:17px;font-weight:800;color:var(--strong)}
+.mock .chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.mock .chip{padding:6px 11px;border-radius:9px;border:1px solid var(--border2);font-size:12.5px;color:var(--body)}
+.mock .chip.on{background:color-mix(in srgb,var(--accent) 14%,transparent);border-color:transparent;color:var(--strong);font-weight:700}
+.oc{display:flex;justify-content:space-between;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-top:10px}
+.oc b{display:block;font-size:15px;color:var(--strong)}
+.oc small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.oc .t{font-size:20px;font-weight:800;color:var(--strong);text-align:right}
+.pill{display:inline-block;margin-top:8px;margin-right:4px;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:700;color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent)}
+.pill.u{--c:var(--unpaid);font-size:11px;padding:2px 8px}
+
+/* sections */
+section{padding:64px 0;scroll-margin-top:64px}
+section.alt{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.eyebrow{margin:0 0 8px;font-size:13px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--accent)}
+h2{margin:0 0 12px;font-size:clamp(26px,3.4vw,36px);line-height:1.15;font-weight:900;letter-spacing:-.6px;color:var(--strong)}
+.sub{margin:0 0 36px;max-width:40em;color:var(--muted);font-size:17px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media (max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.cards{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px}
+section.alt .card{background:var(--alt)}
+.card h3{margin:14px 0 6px;font-size:18px;font-weight:800;color:var(--strong)}
+.card p{margin:0;color:var(--muted);font-size:15px}
+.ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center}
+.ic svg{width:24px;height:24px;fill:currentColor}
+.ic.b{background:var(--tint-blue);color:var(--accent)}.ic.g{background:var(--tint-green);color:var(--c-ready)}
+.ic.p{background:var(--tint-purple);color:var(--c-folding)}.ic.a{background:var(--tint-amber);color:var(--c-drying)}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;counter-reset:s}
+@media (max-width:760px){.steps{grid-template-columns:1fr}}
+.step{position:relative;padding:22px 22px 22px 22px}
+.step::before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:var(--accent);color:var(--on-accent);font-weight:900;margin-bottom:12px}
+.step h3{margin:0 0 6px;font-size:18px;font-weight:800;color:var(--strong)}
+.step p{margin:0;color:var(--muted);font-size:15px}
+
+/* use it your way */
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;max-width:760px}
+.two .card .btn{margin-top:16px}
+
+/* final cta */
+.final{text-align:center;padding:72px 0}
+.final .box{background:var(--accent);color:var(--on-accent);border-radius:28px;padding:48px 24px}
+.final h2{color:inherit;margin-bottom:10px}
+.final p{margin:0 auto 24px;max-width:32em;opacity:.9;font-size:17px}
+.final .btn{background:var(--on-accent);color:var(--accent)}
+
+footer{padding:36px 0 48px;border-top:1px solid var(--border);color:var(--muted);font-size:14px}
+footer .row{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px}
+footer .links{display:flex;flex-wrap:wrap;gap:18px}
+footer a{color:var(--muted);text-decoration:none}footer a:hover{color:var(--accent);text-decoration:underline}
+footer img{height:26px;width:auto}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap bar">
+    <a href="/landing/" aria-label="Laundry Mate home"><img class="wordmark brand-img" src="/landing/wordmark.png" alt="Laundry Mate"></a>
+    <nav>
+      <a class="l" href="#features">Features</a>
+      <a class="l" href="#how">How it works</a>
+      <a class="l" href="#use">Get started</a>
+      <a class="btn sm" href="/app/">Open web app</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<div class="hero">
+  <div class="wrap grid">
+    <div>
+      <h1>Run your laundry shop from <span>one screen.</span></h1>
+      <p class="lead">Laundry Mate handles order intake, the wash-to-pickup queue, washer and dryer timers, payments and sales reports — on your phone and in your browser.</p>
+      <div class="cta">
+        <a class="btn" href="/app/">Open web app</a>
+        <a class="btn outline" data-play href="#" target="_blank" rel="noopener">Get it on Google Play</a>
+      </div>
+      <p class="fine">Sign in with the same account you use in the mobile app.</p>
+    </div>
+
+    <div class="mock" aria-hidden="true">
+      <div class="mh"><img class="brand-img" src="/landing/logo.png" alt=""><b>Queue</b></div>
+      <div class="chips"><span class="chip">Received (2)</span><span class="chip on">Washing (1)</span><span class="chip">Drying (1)</span><span class="chip">Ready (3)</span></div>
+      <div class="oc"><div><b>Maria Santos</b><small>Ref: WF-K3P9QA</small><span class="pill" style="--c:var(--c-washing)">Washing</span><span class="pill u">Unpaid</span></div><div class="t">₱240</div></div>
+      <div class="oc"><div><b>Juan dela Cruz</b><small>Ref: WF-A7M2XR</small><span class="pill" style="--c:var(--c-drying)">Drying</span><span class="pill" style="--c:var(--c-ready)">Paid</span></div><div class="t">₱180</div></div>
+      <div class="oc"><div><b>Ana Reyes</b><small>Ref: WF-Q5T8NB</small><span class="pill" style="--c:var(--c-ready)">Ready</span><span class="pill" style="--c:var(--c-ready)">Paid</span></div><div class="t">₱320</div></div>
+    </div>
+  </div>
+</div>
+
+<section id="features" class="alt">
+  <div class="wrap">
+    <p class="eyebrow">Features</p>
+    <h2>Everything a laundry counter needs</h2>
+    <p class="sub">From the moment a customer drops off a bag to the moment they pick it up, every step is in one place.</p>
+    <div class="cards">
+      <div class="card"><div class="ic b"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg></div><h3>New orders in seconds</h3><p>Pick the services, enter the weight or number of pieces, and the total is worked out for you, including per-kg pricing and add-ons.</p></div>
+      <div class="card"><div class="ic g"><svg viewBox="0 0 24 24"><path d="M4 4h4.5a1 1 0 011 1v14a1 1 0 01-1 1H4a1 1 0 01-1-1V5a1 1 0 011-1zm5.5 0h5a1 1 0 011 1v8a1 1 0 01-1 1h-5V4zm6.5 0h4a1 1 0 011 1v11a1 1 0 01-1 1h-4V4z"/></svg></div><h3>A live queue</h3><p>Orders move from Received to Washing, Drying, Folding, Ready and Picked up, and every device sees the change as it happens.</p></div>
+      <div class="card"><div class="ic p"><svg viewBox="0 0 24 24"><path d="M18 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2zM7 4a1 1 0 110 2 1 1 0 010-2zm3 0a1 1 0 110 2 1 1 0 010-2zm2 16a6 6 0 110-12 6 6 0 010 12z"/></svg></div><h3>Washers &amp; dryers</h3><p>Assign loads to machines, watch the countdown, and send finished loads on to drying or folding with one tap.</p></div>
+      <div class="card"><div class="ic a"><svg viewBox="0 0 24 24"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm8-2v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4zm13-2h-2v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg></div><h3>Customer tracking</h3><p>Every order gets a reference and a tracking link or QR code, so customers can check on their laundry without calling the shop.</p></div>
+      <div class="card"><div class="ic b"><svg viewBox="0 0 24 24"><path d="M21 18v1a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v1h-9a2 2 0 00-2 2v8a2 2 0 002 2h9zm-9-2h10V8H12v8zm4-2.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"/></svg></div><h3>Payments</h3><p>Record cash, GCash, Maya or card payments, or let the customer pay at pickup. Unpaid orders are always easy to spot.</p></div>
+      <div class="card"><div class="ic g"><svg viewBox="0 0 24 24"><path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zm5.6 8H19v6h-2.8v-6z"/></svg></div><h3>Reports for owners</h3><p>See sales for today, this week and this month, plus daily, weekly and custom reports. Attendants only see the work queue.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <p class="eyebrow">How it works</p>
+    <h2>Up and running in three steps</h2>
+    <p class="sub">No special equipment needed. A phone or any computer with a browser is enough.</p>
+    <div class="steps">
+      <div class="card step"><h3>Set up your shop</h3><p>Create your shop, add your services and prices, and add your washers and dryers.</p></div>
+      <div class="card step"><h3>Take and move orders</h3><p>Staff sign in on a phone or the web app, enter orders and move them through the queue.</p></div>
+      <div class="card step"><h3>Keep customers informed</h3><p>Share the tracking link, collect payment, and check your sales whenever you like.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="use" class="alt">
+  <div class="wrap">
+    <p class="eyebrow">Get started</p>
+    <h2>Use it on your phone or in your browser</h2>
+    <p class="sub">Same account, same data, everywhere. Start an order on the counter computer and check the queue from your phone.</p>
+    <div class="two">
+      <div class="card"><div class="ic b"><svg viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 00-2 2v10a2 2 0 002 2h6v2H8v2h8v-2h-2v-2h6a2 2 0 002-2V6a2 2 0 00-2-2zm0 12H4V6h16v10z"/></svg></div><h3>Web app</h3><p>Open Laundry Mate in any modern browser. Nothing to install.</p><a class="btn" href="/app/">Open web app</a></div>
+      <div class="card" data-play><div class="ic g"><svg viewBox="0 0 24 24"><path d="M17 1H7a2 2 0 00-2 2v18a2 2 0 002 2h10a2 2 0 002-2V3a2 2 0 00-2-2zm0 18H7V5h10v14z"/></svg></div><h3>Android app</h3><p>Install the app for the fastest everyday use at the counter.</p><a class="btn outline" data-play-link href="#" target="_blank" rel="noopener">Get it on Google Play</a></div>
+    </div>
+  </div>
+</section>
+
+<div class="final">
+  <div class="wrap"><div class="box">
+    <h2>Ready to try Laundry Mate?</h2>
+    <p>Sign in and take your first order in minutes.</p>
+    <a class="btn" href="/app/">Open web app</a>
+  </div></div>
+</div>
+</main>
+
+<footer>
+  <div class="wrap row">
+    <div style="display:flex;align-items:center;gap:12px"><img class="brand-img" src="/landing/logo.png" alt=""><span>© <span id="yr">2026</span> Laundry Mate</span></div>
+    <div class="links"><a href="/track">Track an order</a><a href="/privacy">Privacy Policy</a><a href="/delete-account">Delete account</a></div>
+  </div>
+</footer>
+
+<script>
+  // Put your Google Play listing URL here to show the Android buttons. Left empty, they stay hidden.
+  var PLAY_URL = '';
+  if (PLAY_URL) {
+    document.querySelectorAll('[data-play]').forEach(function (el) { if (el.tagName === 'A') el.href = PLAY_URL; });
+    document.querySelectorAll('[data-play-link]').forEach(function (el) { el.href = PLAY_URL; });
+  } else {
+    document.querySelectorAll('[data-play]').forEach(function (el) { el.classList.add('hidden'); });
+  }
+  document.getElementById('yr').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>

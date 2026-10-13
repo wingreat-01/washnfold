@@ -33161,8 +33161,8 @@ a8l(a){var s=0,r=A.r(t.H),q
 var $async$a8l=A.t(function(b,c){if(b===1)return A.o(c,r)
 for(;;)switch(s){case 0:q=a.a8(t.J).f
 s=2
-return A.i(A.aSP(A.cH("https://wnf.prohubapps.com/privacy",0,null),B.PS,null),$async$a8l)
-case 2:if(!c)q.dD(A.ey(null,null,null,null,null,B.n,null,A.O("Could not open https://wnf.prohubapps.com/privacy",null,null,null,null,null,null,null),null,B.av,null,null,null,null,null,null,null,null,null,null))
+return A.i(A.aSP(A.cH("https://laundrymate.prohubapps.com/privacy",0,null),B.PS,null),$async$a8l)
+case 2:if(!c)q.dD(A.ey(null,null,null,null,null,B.n,null,A.O("Could not open https://laundrymate.prohubapps.com/privacy",null,null,null,null,null,null,null),null,B.av,null,null,null,null,null,null,null,null,null,null))
 return A.p(null,r)}})
 return A.q($async$a8l,r)},
 G5:function G5(a,b){this.c=a
@@ -115145,7 +115145,7 @@ F(a){var s=this,r=null,q=s.f,p=q?8:10,o=q?3:4,n=s.d,m=s.e,l=A.a7(B.d.aC(255*(m?0
 m=m?B.a2:B.aH
 return A.ca(r,A.O(s.c,r,r,r,A.aT(r,r,n,r,r,r,r,r,r,r,r,q?11:12,r,r,m,r,r,!0,r,r,r,r,r,r,r,r),r,r,r),B.o,r,r,new A.c0(l,r,r,k,r,r,B.Z),r,r,r,new A.a6(p,o,p,o),r,r,r)}}
 A.u8.prototype={
-F(a){var s,r,q,p=null,o=this.c,n="https://wnf.prohubapps.com/track/"+o.a,m=A.v(a).ok.w
+F(a){var s,r,q,p=null,o=this.c,n="https://laundrymate.prohubapps.com/track/"+o.a,m=A.v(a).ok.w
 m=m==null?p:m.m9(B.aH)
 m=A.O(o.e,p,p,p,m,p,p,p)
 o=A.atp("Receipt reference: "+o.b,B.dA,p)
@@ -115194,7 +115194,7 @@ s.toString
 return A.a8l(s)},
 $S:0}
 A.z8.prototype={
-F(a){var s=null,r="https://wnf.prohubapps.com/track?shop="+this.c,q=t.p,p=A.bY(A.aS(A.b([B.a93,B.fF,A.ca(s,A.b13(B.k,r,220),B.o,B.k,s,s,s,s,s,B.f4,s,s,s),B.U,A.atp(r,B.kW,B.ac)],q),B.q,B.j,B.T),s,300)
+F(a){var s=null,r="https://laundrymate.prohubapps.com/track?shop="+this.c,q=t.p,p=A.bY(A.aS(A.b([B.a93,B.fF,A.ca(s,A.b13(B.k,r,220),B.o,B.k,s,s,s,s,s,B.f4,s,s,s),B.U,A.atp(r,B.kW,B.ac)],q),B.q,B.j,B.T),s,300)
 return A.lc(A.b([A.ax6(B.OB,B.a8Z,new A.avg(r,a),s),A.eu(B.Fi,new A.avh(a),s)],q),p,B.a8R)}}
 A.avg.prototype={
 $0(){A.wP(new A.oP(this.a))

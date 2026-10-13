@@ -1,8 +1,19 @@
 {
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/landing/",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     {
       "source": "/track",
       "destination": "/track/index.html"
+    },
+    {
+      "source": "/track/:orderId",
+      "destination": "/app/index.html"
     },
     {
       "source": "/delete-account",
@@ -21,8 +32,8 @@
       "destination": "/reset-password/index.html"
     },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "source": "/app/:path*",
+      "destination": "/app/index.html"
     }
   ],
   "headers": [
