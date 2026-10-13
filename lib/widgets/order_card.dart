@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import '../models/order.dart';
 import '../theme/app_theme.dart';
 import 'machine_timer.dart';
+import 'package:provider/provider.dart';
+import '../providers/currency_settings.dart';
 
 class OrderCard extends StatelessWidget {
   final Order order;
@@ -60,7 +62,7 @@ class OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currency = NumberFormat.currency(symbol: '₱', decimalDigits: 0);
+    final currency = context.watch<CurrencySettings>().format(decimals: 0);
     final nextStatus = order.status.next;
 
     return Card(

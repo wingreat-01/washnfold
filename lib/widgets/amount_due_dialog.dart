@@ -6,6 +6,8 @@ import '../models/order.dart';
 import '../models/payment.dart';
 import '../providers/order_provider.dart';
 import '../utils/app_errors.dart';
+import 'package:provider/provider.dart';
+import '../providers/currency_settings.dart';
 
 /// Shows the "Amount due" checkout modal for [order] and, if the cashier
 /// confirms, records the payment. Returns true when the order was marked
@@ -57,12 +59,10 @@ class _AmountDueDialogState extends State<AmountDueDialog> {
   static const _ledgerRed = Color(0xFFE5484D);
   static const _readoutBg = Color(0xFF14171C);
 
-  // PHP cash values, same as MERQ's peso Currency config.
-  // ₱200 is left out on purpose (BSP halted production in 2021).
-  static const _bills = <double>[20, 50, 100, 500, 1000];
-  static const _stackStep = 100.0;
-  static const _roundUpSteps = <double>[50, 100, 500];
-  static const _largestBill = 1000.0;
+  // Cash values for the quick-cash chips come from the chosen currency
+  // (Settings -> Currency).
+  AppCurrency get _cur => context.read<CurrencySettings>().currency;
+  String get _sym => _cur.symbol.trim();
 
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
@@ -99,10 +99,10 @@ class _AmountDueDialogState extends State<AmountDueDialog> {
 
   String _money(double v) {
     final isWhole = (v - v.roundToDouble()).abs() < 0.005;
-    return NumberFormat.currency(
-      symbol: '₱',
-      decimalDigits: isWhole ? 0 : 2,
-    ).format(v);
+    return context
+        .read<CurrencySettings>()
+        .format(decimals: isWhole ? 0 : 2)
+        .format(v);
   }
 
   // After a quick chip fills the tendered field, CHANGE and Confirm are
@@ -149,21 +149,21 @@ class _AmountDueDialogState extends State<AmountDueDialog> {
       (value / multiple).ceil() * multiple;
 
   // Up to the largest bill: real bills that alone cover the total, plus
-  // the total rounded up to a stack of ₱100s (e.g. ₱220 → ₱300).
+  // the total rounded up to a stack (e.g. 220 → 300 for pesos).
   List<double> get _billBasedOptions => <double>{
-        ..._bills.where((a) => a >= _total),
-        if (_total > 0) _ceilToMultiple(_total, _stackStep),
+        ..._cur.bills.where((a) => a >= _total),
+        if (_total > 0) _ceilToMultiple(_total, _cur.stackStep),
       }.toList()
         ..sort();
 
   // Above the largest bill nothing single covers it, so offer round-up
-  // targets instead (₱1043 → ₱1050 / ₱1100 / ₱1500).
+  // targets instead (e.g. 1043 → 1050 / 1100 / 1500 for pesos).
   List<double> get _quickRoundUpTargets => <double>{
-        for (final step in _roundUpSteps) _ceilToMultiple(_total, step),
+        for (final step in _cur.roundUpSteps) _ceilToMultiple(_total, step),
       }.toList()
         ..sort();
 
-  bool get _useRoundUpTargets => _total > _largestBill;
+  bool get _useRoundUpTargets => _total > _cur.largestBill;
 
   List<double> get _quickAmountOptions =>
       _useRoundUpTargets ? _quickRoundUpTargets : _billBasedOptions;
@@ -325,7 +325,7 @@ class _AmountDueDialogState extends State<AmountDueDialog> {
                     style: _mono(
                         size: 22, weight: FontWeight.w700, color: _ledAmber),
                     decoration: InputDecoration(
-                      prefixText: '₱ ',
+                      prefixText: '$_sym ',
                       prefixStyle: _mono(
                           size: 22,
                           weight: FontWeight.w700,
@@ -348,8 +348,8 @@ class _AmountDueDialogState extends State<AmountDueDialog> {
                       for (final amount in _quickAmountOptions)
                         _Chip(
                           label: _useRoundUpTargets
-                              ? '₱${amount.toStringAsFixed(0)}'
-                              : '+₱${amount.toStringAsFixed(0)}',
+                              ? '$_sym${amount.toStringAsFixed(0)}'
+                              : '+$_sym${amount.toStringAsFixed(0)}',
                           compact: true,
                           textStyle: _mono(),
                           onTap: () => _useRoundUpTargets

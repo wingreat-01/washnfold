@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/dashboard_provider.dart';
 import '../theme/app_theme.dart';
+import '../providers/currency_settings.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -24,7 +25,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final dashboard = context.watch<DashboardProvider>();
-    final currency = NumberFormat.currency(symbol: '₱', decimalDigits: 0);
+    final currency = context.watch<CurrencySettings>().format(decimals: 0);
 
     if (dashboard.loading && dashboard.todayRevenue == 0) {
       return const Center(child: CircularProgressIndicator());

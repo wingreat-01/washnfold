@@ -12,6 +12,7 @@ import '../widgets/order_qr_dialog.dart';
 import '../widgets/washer_picker.dart';
 import '../utils/app_errors.dart';
 import '../theme/app_theme.dart';
+import '../providers/currency_settings.dart';
 
 /// New-order intake: pick services, enter weight/piece count, see the running
 /// total, submit. This is the screen an attendant lives in.
@@ -103,10 +104,10 @@ class _OrderIntakeScreenState extends State<OrderIntakeScreen> {
 
   String _money(double v) {
     final isWhole = (v - v.roundToDouble()).abs() < 0.005;
-    return NumberFormat.currency(
-      symbol: '₱',
-      decimalDigits: isWhole ? 0 : 2,
-    ).format(v);
+    return context
+        .read<CurrencySettings>()
+        .format(decimals: isWhole ? 0 : 2)
+        .format(v);
   }
 
   String _kg(double v) {
@@ -228,7 +229,7 @@ class _OrderIntakeScreenState extends State<OrderIntakeScreen> {
   @override
   Widget build(BuildContext context) {
     final catalog = context.watch<ServiceCatalogProvider>();
-    final currency = NumberFormat.currency(symbol: '₱', decimalDigits: 0);
+    final currency = context.watch<CurrencySettings>().format(decimals: 0);
 
     if (catalog.loading) {
       return const Center(child: CircularProgressIndicator());
@@ -251,7 +252,7 @@ class _OrderIntakeScreenState extends State<OrderIntakeScreen> {
                 // Web / wide layout: the order panel on the right holds the
                 // selected services at the top and the Create order button
                 // and Total pinned to its bottom.
-                SizedBox(width: 400, child: _buildOrderPanel(catalog)),
+                SizedBox(width: 400, child: _buildOrderPanel(catalog, currency)),
               ],
             ),
           );
@@ -718,7 +719,8 @@ class _OrderIntakeScreenState extends State<OrderIntakeScreen> {
   /// Wide layout only: right-hand order panel. Selected services sit at the
   /// top (scrolling if there are many); Total and Create order stay fixed at
   /// the bottom right.
-  Widget _buildOrderPanel(ServiceCatalogProvider catalog) {
+  Widget _buildOrderPanel(
+      ServiceCatalogProvider catalog, NumberFormat currency) {
     final selected = catalog.activeServices
         .where((s) => _selected.contains(s.id))
         .toList();
@@ -769,8 +771,7 @@ class _OrderIntakeScreenState extends State<OrderIntakeScreen> {
                     ],
                   ),
           ),
-          _buildSummary(NumberFormat.currency(symbol: '₱', decimalDigits: 0),
-              stacked: true),
+          _buildSummary(currency, stacked: true),
         ],
       ),
     );

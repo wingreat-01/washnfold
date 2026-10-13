@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../models/order.dart';
 import '../providers/order_provider.dart';
 import '../theme/app_theme.dart';
+import '../providers/currency_settings.dart';
 
 /// Owner-only sales/order-value report. Uses the shop-scoped orders already
 /// loaded by OrderProvider and filters them by the order creation date.
@@ -21,7 +22,7 @@ class _SalesReportsScreenState extends State<SalesReportsScreen> {
   DateTime _selectedDay = DateTime.now();
   DateTime _start = DateTime.now().subtract(const Duration(days: 6));
   DateTime _end = DateTime.now();
-  final _money = NumberFormat.currency(symbol: '₱', decimalDigits: 2);
+  NumberFormat get _money => context.read<CurrencySettings>().format(decimals: 2);
   final _date = DateFormat('MMM d, yyyy');
 
   DateTime _day(DateTime value) => DateTime(value.year, value.month, value.day);
@@ -80,6 +81,7 @@ class _SalesReportsScreenState extends State<SalesReportsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<CurrencySettings>(); // rebuild when the currency changes
     final provider = context.watch<OrderProvider>();
     final orders = provider.orders.where((o) {
       return !o.createdAt.isBefore(_rangeStart) &&

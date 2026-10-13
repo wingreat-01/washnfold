@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config.dart';
 import 'models/staff.dart';
+import 'providers/currency_settings.dart';
 import 'providers/theme_settings.dart';
 import 'screens/app_shell.dart';
 import 'screens/customer_tracking_screen.dart';
@@ -35,9 +36,14 @@ Future<void> main() async {
   // doesn't flash the wrong theme on startup.
   final themeSettings = ThemeSettings();
   await themeSettings.load();
+  final currencySettings = CurrencySettings();
+  await currencySettings.load();
   runApp(
-    ChangeNotifierProvider<ThemeSettings>.value(
-      value: themeSettings,
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<ThemeSettings>.value(value: themeSettings),
+        ChangeNotifierProvider<CurrencySettings>.value(value: currencySettings),
+      ],
       child: const WashNFoldApp(),
     ),
   );

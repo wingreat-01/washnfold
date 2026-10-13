@@ -9,6 +9,7 @@ import '../providers/waitlist.dart';
 import '../providers/washer_provider.dart';
 import 'amount_due_dialog.dart';
 import '../utils/app_errors.dart';
+import '../providers/currency_settings.dart';
 
 /// True while the washer picker sheet is on screen. The "washer just freed
 /// up" prompt stays quiet then, because the picker already updates live.
@@ -307,7 +308,7 @@ class _AllBusyInfoState extends State<_AllBusyInfo> {
     final isPaid = order.paymentStatus == PaymentStatus.paid ||
         _paidUpfront.contains(order.id);
     final canCollect = !isPaid && order.total > 0;
-    final money = NumberFormat.currency(symbol: '₱', decimalDigits: 0);
+    final money = context.watch<CurrencySettings>().format(decimals: 0);
 
     return Column(
       mainAxisSize: MainAxisSize.min,

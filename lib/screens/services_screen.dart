@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../models/service_item.dart';
 import '../providers/service_catalog_provider.dart';
 import '../utils/app_errors.dart';
+import '../providers/currency_settings.dart';
 
 /// Manage the shop's services — add, edit price, switch on/off, delete.
 /// Works like adding a product in a POS: whatever is active here shows up
@@ -66,7 +67,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
   @override
   Widget build(BuildContext context) {
     final catalog = context.watch<ServiceCatalogProvider>();
-    final currency = NumberFormat.currency(symbol: '₱', decimalDigits: 2);
+    final currency = context.watch<CurrencySettings>().format(decimals: 2);
 
     if (catalog.loading && catalog.services.isEmpty) {
       return const Center(child: CircularProgressIndicator());
@@ -296,7 +297,7 @@ class _ServiceFormState extends State<_ServiceForm> {
     if (maxKg == null || maxKg <= 0 || flat == null) {
       return const SizedBox.shrink();
     }
-    final fmt = NumberFormat.currency(symbol: '₱', decimalDigits: 2);
+    final fmt = context.read<CurrencySettings>().format(decimals: 2);
     final sample = ServiceItem(
       id: '',
       shopId: '',
@@ -351,7 +352,7 @@ class _ServiceFormState extends State<_ServiceForm> {
               onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
                 labelText: 'Price',
-                prefixText: '₱ ',
+                prefixText: '${context.read<CurrencySettings>().symbol} ',
               ),
             ),
               const SizedBox(height: 12),
@@ -393,7 +394,8 @@ class _ServiceFormState extends State<_ServiceForm> {
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: const Text('Flat price up to a max weight'),
-                subtitle: const Text('e.g. ₱70 for up to 7 kg'),
+                subtitle: Text(
+                    'e.g. ${context.read<CurrencySettings>().symbol}70 for up to 7 kg'),
                 value: _useMaxKg,
                 onChanged: (v) => setState(() => _useMaxKg = v),
               ),
@@ -418,9 +420,9 @@ class _ServiceFormState extends State<_ServiceForm> {
                         controller: _maxKgPrice,
                         keyboardType: const TextInputType.numberWithOptions(
                             decimal: true),
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Flat price',
-                          prefixText: '₱ ',
+                          prefixText: '${context.read<CurrencySettings>().symbol} ',
                         ),
                         onChanged: (_) => setState(() {}),
                       ),

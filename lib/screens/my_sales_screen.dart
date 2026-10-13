@@ -7,6 +7,8 @@ import '../models/sales_today.dart';
 import '../services/supabase_service.dart';
 import '../utils/app_errors.dart';
 import '../theme/app_theme.dart';
+import 'package:provider/provider.dart';
+import '../providers/currency_settings.dart';
 
 /// Attendant tab: what I collected today, the shop's total today, and a cash
 /// check (counted drawer vs what the app recorded). Today only, decided in
@@ -22,7 +24,7 @@ class MySalesScreen extends StatefulWidget {
 
 class _MySalesScreenState extends State<MySalesScreen> {
 
-  final _money = NumberFormat.currency(symbol: '₱', decimalDigits: 2);
+  NumberFormat get _money => context.read<CurrencySettings>().format(decimals: 2);
   final _floatCtrl = TextEditingController();
   final _countedCtrl = TextEditingController();
 
@@ -80,7 +82,7 @@ class _MySalesScreenState extends State<MySalesScreen> {
   }
 
   double? _parse(String text) {
-    final t = text.replaceAll(',', '').replaceAll('₱', '').trim();
+    final t = text.replaceAll(',', '').replaceAll(context.read<CurrencySettings>().symbol, '').trim();
     if (t.isEmpty) return null;
     final v = double.tryParse(t);
     return (v == null || v < 0 || v > 100000000) ? null : v;
@@ -88,6 +90,7 @@ class _MySalesScreenState extends State<MySalesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<CurrencySettings>(); // rebuild when the currency changes
     if (_loading && _sales == null) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -236,9 +239,9 @@ class _MySalesScreenState extends State<MySalesScreen> {
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
               onChanged: (_) => setState(() {}),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Starting cash in drawer (optional)',
-                prefixText: '₱ ',
+                prefixText: '${context.read<CurrencySettings>().symbol} ',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -248,9 +251,9 @@ class _MySalesScreenState extends State<MySalesScreen> {
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
               onChanged: (_) => setState(() {}),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Cash counted now',
-                prefixText: '₱ ',
+                prefixText: '${context.read<CurrencySettings>().symbol} ',
                 border: OutlineInputBorder(),
               ),
             ),

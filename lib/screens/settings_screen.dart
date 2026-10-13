@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/staff.dart';
+import '../providers/currency_settings.dart';
 import '../providers/service_catalog_provider.dart';
 import '../providers/theme_settings.dart';
 import '../services/supabase_service.dart';
@@ -110,6 +111,12 @@ class SettingsScreen extends StatelessWidget {
               const Card(
                 margin: EdgeInsets.zero,
                 child: _ThemePicker(),
+              ),
+              const SizedBox(height: 28),
+              const _SectionLabel('Currency'),
+              const Card(
+                margin: EdgeInsets.zero,
+                child: _CurrencyTile(),
               ),
               if (role.canManagePricing || role.canManageStaff) ...[
                 const SizedBox(height: 28),
@@ -237,6 +244,85 @@ class _ThemePicker extends StatelessWidget {
           selected: {mode},
           onSelectionChanged: (selection) =>
               context.read<ThemeSettings>().setMode(selection.first),
+        ),
+      ),
+    );
+  }
+}
+
+/// Shows the current currency and opens a list to change it. Remembered on
+/// this device (see CurrencySettings). Only changes how amounts are shown;
+/// stored prices are not converted.
+class _CurrencyTile extends StatelessWidget {
+  const _CurrencyTile();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.watch<CurrencySettings>().currency;
+    return ListTile(
+      leading: const Icon(Icons.payments_outlined),
+      title: const Text('Currency'),
+      subtitle: Text('${c.symbol.trim()}  ${c.name} (${c.code})'),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () => _pick(context),
+    );
+  }
+
+  Future<void> _pick(BuildContext context) async {
+    final settings = context.read<CurrencySettings>();
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(sheetContext).size.height * 0.75,
+          ),
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
+                child: Text(
+                  'Choose currency',
+                  style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                child: Text(
+                  'Changes how prices and totals are shown on this device. '
+                  'Existing prices are not converted.',
+                  style: Theme.of(sheetContext).textTheme.bodySmall,
+                ),
+              ),
+              for (final cur in AppCurrency.all)
+                ListTile(
+                  leading: SizedBox(
+                    width: 40,
+                    child: Text(
+                      cur.symbol.trim(),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w800, fontSize: 18),
+                    ),
+                  ),
+                  title: Text(cur.name),
+                  subtitle: Text(cur.code),
+                  trailing: cur.code == settings.currency.code
+                      ? Icon(Icons.check_circle,
+                          color: Theme.of(sheetContext).colorScheme.primary)
+                      : null,
+                  onTap: () {
+                    settings.setCurrency(cur.code);
+                    Navigator.of(sheetContext).pop();
+                  },
+                ),
+            ],
+          ),
         ),
       ),
     );
