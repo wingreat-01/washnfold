@@ -1,7 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' show AuthChangeEvent, AuthState;
+import 'package:supabase_flutter/supabase_flutter.dart'
+    show AuthChangeEvent, AuthException, AuthState;
 
 import '../services/supabase_service.dart';
 import '../widgets/privacy_policy_link.dart';
@@ -169,10 +170,35 @@ class _LoginScreenState extends State<LoginScreen> {
       widget.onSignedIn();
     } catch (e) {
       logDebug('create account failed: $e');
-      setState(() => _error = friendlyError(e, fallback: 'Could not create the account. Please try again.'));
+      setState(() {
+        if (e is AuthException) {
+          // Show Supabase's real reason (already registered, weak password,
+          // email rate limit, sign-ups disabled...) instead of the generic
+          // "session expired" text, which is wrong for sign-up.
+          _error = _signUpMessage(e);
+        } else {
+          _error = friendlyError(e,
+              fallback: 'Could not create the account. Please try again.');
+        }
+      });
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  String _signUpMessage(AuthException e) {
+    final m = e.message.toLowerCase();
+    if (m.contains('already registered') || m.contains('already been registered')) {
+      return 'That email already has an account. Try signing in instead.';
+    }
+    if (m.contains('rate limit') || e.statusCode == '429') {
+      return 'Too many sign-up emails were sent. Please wait a few minutes and try again.';
+    }
+    if (m.contains('password')) return e.message;
+    if (m.contains('signups not allowed') || m.contains('signup is disabled')) {
+      return 'New sign-ups are turned off right now.';
+    }
+    return e.message;
   }
 
   @override

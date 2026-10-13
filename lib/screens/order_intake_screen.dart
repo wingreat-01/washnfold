@@ -237,18 +237,21 @@ class _OrderIntakeScreenState extends State<OrderIntakeScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 900;
-        final serviceList = _buildServiceList(catalog, currency);
-        final summary = _buildSummary(currency);
+        final serviceList =
+            _buildServiceList(catalog, currency, isWide: isWide);
 
         if (isWide) {
           return Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(flex: 2, child: serviceList),
                 const SizedBox(width: 16),
-                SizedBox(width: 340, child: summary),
+                // Web / wide layout: the order panel on the right holds the
+                // selected services at the top and the Create order button
+                // and Total pinned to its bottom.
+                SizedBox(width: 400, child: _buildOrderPanel(catalog)),
               ],
             ),
           );
@@ -256,7 +259,7 @@ class _OrderIntakeScreenState extends State<OrderIntakeScreen> {
         return Column(
           children: [
             Expanded(child: serviceList),
-            summary,
+            _buildSummary(currency),
           ],
         );
       },
@@ -264,7 +267,8 @@ class _OrderIntakeScreenState extends State<OrderIntakeScreen> {
   }
 
   Widget _buildServiceList(
-      ServiceCatalogProvider catalog, NumberFormat currency) {
+      ServiceCatalogProvider catalog, NumberFormat currency,
+      {bool isWide = false}) {
     final selected = catalog.activeServices
         .where((s) => _selected.contains(s.id))
         .toList();
@@ -354,7 +358,9 @@ class _OrderIntakeScreenState extends State<OrderIntakeScreen> {
               );
             },
           ),
-        if (selected.isNotEmpty) ...[
+        // On the wide layout the selected services live in the right-hand
+        // order panel instead (see _buildOrderPanel).
+        if (selected.isNotEmpty && !isWide) ...[
           const SizedBox(height: 20),
           Text('Enter weight or quantity',
               style: Theme.of(context).textTheme.titleMedium),
@@ -700,79 +706,266 @@ class _OrderIntakeScreenState extends State<OrderIntakeScreen> {
     );
   }
 
-  Widget _buildSummary(NumberFormat currency) {
-    final primary = Theme.of(context).colorScheme.primary;
+  String? _detailFor(ServiceItem service) {
+    if (!service.hasMaxKgPricing) return null;
+    final qty = _quantities[service.id] ?? 0;
+    return qty > service.maxKg!
+        ? '${_money(service.maxKgPrice!)} + '
+            '${_kg(qty - service.maxKg!)} kg × ${_money(service.extraKgRate)}'
+        : 'Up to ${_kg(service.maxKg!)} kg = ${_money(service.maxKgPrice!)}';
+  }
+
+  /// Wide layout only: right-hand order panel. Selected services sit at the
+  /// top (scrolling if there are many); Total and Create order stay fixed at
+  /// the bottom right.
+  Widget _buildOrderPanel(ServiceCatalogProvider catalog) {
+    final selected = catalog.activeServices
+        .where((s) => _selected.contains(s.id))
+        .toList();
+    final addOns = catalog.activeAddOns
+        .where((s) => (_quantities[s.id] ?? 0) > 0)
+        .toList();
+    final empty = selected.isEmpty && addOns.isEmpty;
+
     return Container(
-      padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        border: Border(
-          top: BorderSide(color: Theme.of(context).dividerColor, width: 1),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Theme.of(context).dividerColor),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 16, 18, 8),
+            child: Text(
+              'Selected services',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: context.palette.strong,
+                    fontWeight: FontWeight.w800,
+                  ),
+            ),
+          ),
+          Expanded(
+            child: empty
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Text(
+                        'Tap a service to add it to this order.',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: context.palette.muted,
+                            ),
+                      ),
+                    ),
+                  )
+                : ListView(
+                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                    children: [
+                      ...selected.map(_panelRow),
+                      ...addOns.map(_panelAddOnRow),
+                    ],
+                  ),
+          ),
+          _buildSummary(NumberFormat.currency(symbol: '₱', decimalDigits: 0),
+              stacked: true),
+        ],
+      ),
+    );
+  }
+
+  /// Compact weight / piece input for the order panel (two lines so it fits
+  /// the panel width).
+  Widget _panelRow(ServiceItem service) {
+    final detail = _detailFor(service);
+    return Card(
+      key: ValueKey('panel-${service.id}'),
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 10, 6, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(service.name,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontWeight: FontWeight.w700)),
+                ),
+                IconButton(
+                  tooltip: 'Remove from order',
+                  icon: const Icon(Icons.delete_outline),
+                  color: Colors.red,
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () => _removeFromOrder(service),
+                ),
+              ],
+            ),
+            if (detail != null)
+              Text(detail, style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 110,
+                    child: TextField(
+                      controller: _controllerFor(service.id),
+                      autofocus: !_isTapCounted(service),
+                      keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true),
+                      textAlign: TextAlign.center,
+                      decoration: InputDecoration(
+                        hintText: service.unit == PricingUnit.kg ? 'kg' : 'pcs',
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          _quantities[service.id] = double.tryParse(value) ?? 0;
+                        });
+                      },
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    _money(_lineSubtotal(service)),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  /// Read-only line for a ticked add-on (it is toggled from the Add-ons list).
+  Widget _panelAddOnRow(ServiceItem service) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 4, 14, 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text('${service.name} (add-on)',
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyMedium),
+          ),
+          Text(
+            _money(_lineSubtotal(service)),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummary(NumberFormat currency, {bool stacked = false}) {
+    final primary = Theme.of(context).colorScheme.primary;
+
+    Widget createButton(double height) => SizedBox(
+          height: height,
+          child: FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+            ),
+            onPressed: _submitting ? null : _submit,
+            child: _submitting
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text(
+                    'Create order',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+          ),
+        );
+
+    final totalLabel = Text(
+      'Total',
+      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: context.palette.strong,
+            fontWeight: FontWeight.w800,
+            fontSize: 16,
+          ),
+    );
+    Widget totalAmount(double size) => Flexible(
+          child: Text(
+            _money(_grandTotal),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: primary,
+                  fontWeight: FontWeight.w900,
+                  fontSize: size,
+                  letterSpacing: -0.4,
+                ),
+          ),
+        );
+
+    final decoration = BoxDecoration(
+      color: Theme.of(context).colorScheme.surface,
+      border: Border(
+        top: BorderSide(color: Theme.of(context).dividerColor, width: 1),
+      ),
+    );
+
+    // Wide layout: Total on top, Create order underneath, both at the bottom
+    // of the right-hand panel.
+    if (stacked) {
+      return Container(
+        padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
+        decoration: decoration,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [totalLabel, totalAmount(28)],
+            ),
+            const SizedBox(height: 14),
+            createButton(60),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
+      decoration: decoration,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(
-            flex: 3,
-            child: SizedBox(
-              height: 72,
-              child: FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: primary,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                ),
-                onPressed: _submitting ? null : _submit,
-                child: _submitting
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text(
-                        'Create order',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-              ),
-            ),
-          ),
+          Expanded(flex: 3, child: createButton(72)),
           const SizedBox(width: 22),
           Expanded(
             flex: 2,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Total',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: context.palette.strong,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 16,
-                  ),
-                ),
-                Flexible(
-                  child: Text(
-                    _money(_grandTotal),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: primary,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 22,
-                      letterSpacing: -0.4,
-                    ),
-                  ),
-                ),
-              ],
+              children: [totalLabel, totalAmount(22)],
             ),
           ),
         ],
