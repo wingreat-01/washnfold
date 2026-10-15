@@ -50,7 +50,8 @@ class SupabaseService {
     if (kIsWeb) {
       await client.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: Uri.base.origin,
+        // The web app is served from /app/, so return there after Google.
+        redirectTo: '${Uri.base.origin}/app/',
       );
       return;
     }
