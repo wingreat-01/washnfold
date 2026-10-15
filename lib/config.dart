@@ -17,6 +17,9 @@ class AppConfig {
   /// your real support address.
   static const supportEmail = 'laundrymate@prohubapps.com';
 
+  /// Lifetime Plan: one-time price in pesos (early launch promo).
+  static const lifetimePricePhp = 790;
+
   /// The public URL this web app is deployed at, used to build the
   /// customer-facing tracking links encoded in each order's QR code.
   /// Pass your real domain once deployed:
@@ -26,9 +29,18 @@ class AppConfig {
     defaultValue: 'https://laundrymate.prohubapps.com',
   );
 
-  /// Where Google sign-in returns to inside the Android app. Must also be
-  /// listed under Supabase → Authentication → URL Configuration → Redirect
-  /// URLs, and match the intent-filter in AndroidManifest.xml.
+  /// Web OAuth client ID from Google Cloud (the same one set in Supabase →
+  /// Authentication → Providers → Google). The native Android sign-in uses it
+  /// as serverClientId so the ID token is accepted by Supabase.
+  static const googleWebClientId = String.fromEnvironment(
+    'GOOGLE_WEB_CLIENT_ID',
+    defaultValue:
+        '588477716677-ivogpk6e7rrgcle9rrq6qt2iv9rlnbqt.apps.googleusercontent.com',
+  );
+
+  /// No longer used by Google sign-in (Android now signs in natively). Kept
+  /// only so the AndroidManifest.xml deep link still matches; safe to delete
+  /// together with that intent-filter.
   static const mobileAuthRedirect = 'io.supabase.washnfold://login-callback';
 
   /// Public privacy policy page (served from web/privacy/index.html).

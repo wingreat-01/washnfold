@@ -8,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'config.dart';
 import 'models/shop_access.dart';
 import 'models/staff.dart';
+import 'providers/billing_provider.dart';
 import 'providers/currency_settings.dart';
 import 'providers/theme_settings.dart';
 import 'screens/app_shell.dart';
@@ -46,6 +47,7 @@ Future<void> main() async {
       providers: [
         ChangeNotifierProvider<ThemeSettings>.value(value: themeSettings),
         ChangeNotifierProvider<CurrencySettings>.value(value: currencySettings),
+        ChangeNotifierProvider<BillingProvider>(create: (_) => BillingProvider()),
       ],
       child: const WashNFoldApp(),
     ),
@@ -150,6 +152,8 @@ class _RootGateState extends State<_RootGate> {
       _staff = staff;
       _shopId = staff?.shopId;
       _access = staff == null ? null : await _loadAccess();
+      // Start listening for Google Play purchases once signed in (Android).
+      if (staff != null && mounted) context.read<BillingProvider>().init();
     } catch (e) {
       logDebug('resolveShop failed: $e');
       _staff = null;
@@ -201,6 +205,8 @@ class _RootGateState extends State<_RootGate> {
   @override
   void initState() {
     super.initState();
+    // After a verified Lifetime purchase, reload the shop's plan.
+    context.read<BillingProvider>().onLifetimeActivated = _resolveShop;
     _activeTimer =
         Timer.periodic(const Duration(seconds: 60), (_) => _recheckActive());
     // Rebuild on sign-in / sign-out so signOut() actually returns to login.

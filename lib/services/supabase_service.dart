@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:url_launcher/url_launcher.dart' show LaunchMode;
 
 import '../config.dart';
 import '../models/order_queue_info.dart';
@@ -36,18 +36,40 @@ class SupabaseService {
     await client.auth.signInWithPassword(email: email, password: password);
   }
 
-  /// Starts "Continue with Google". On the web the page leaves for Google and
-  /// comes back signed in (the app restarts and picks the session up). On
-  /// Android the browser opens and returns through the deep link in
-  /// AndroidManifest.xml; listen to the auth stream to know when it is done.
+  bool _googleInitialized = false;
+
+  /// "Continue with Google".
+  ///  - Web: there is no native account picker, so the page redirects to
+  ///    Google and comes back signed in (the app restarts and picks the
+  ///    session up).
+  ///  - Android: the native Google account picker opens in-app; the ID token
+  ///    it returns is handed to Supabase. The session is ready when this
+  ///    future completes. Throws [GoogleSignInException] (code `canceled`)
+  ///    if the person closes the picker.
   Future<void> signInWithGoogle() async {
-    await client.auth.signInWithOAuth(
-      OAuthProvider.google,
-      redirectTo: kIsWeb ? Uri.base.origin : AppConfig.mobileAuthRedirect,
-      // On Android use the real system browser (it has the Google session and
-      // reliably hands the custom-scheme deep link back to the app).
-      authScreenLaunchMode:
-          kIsWeb ? LaunchMode.platformDefault : LaunchMode.externalApplication,
+    if (kIsWeb) {
+      await client.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: Uri.base.origin,
+      );
+      return;
+    }
+
+    final google = GoogleSignIn.instance;
+    if (!_googleInitialized) {
+      await google.initialize(serverClientId: AppConfig.googleWebClientId);
+      _googleInitialized = true;
+    }
+
+    final account = await google.authenticate();
+    final idToken = account.authentication.idToken;
+    if (idToken == null) {
+      throw const AuthException('No Google ID token received.');
+    }
+
+    await client.auth.signInWithIdToken(
+      provider: OAuthProvider.google,
+      idToken: idToken,
     );
   }
 
@@ -90,7 +112,15 @@ class SupabaseService {
     });
   }
 
-  Future<void> signOut() => client.auth.signOut();
+  Future<void> signOut() async {
+    // Also forget the Google account so the next sign-in shows the picker.
+    if (!kIsWeb && _googleInitialized) {
+      try {
+        await GoogleSignIn.instance.signOut();
+      } catch (_) {}
+    }
+    await client.auth.signOut();
+  }
 
   /// Permanently deletes the signed-in user's account (Settings → Delete
   /// account). Re-checks the password first so a borrowed, unlocked phone

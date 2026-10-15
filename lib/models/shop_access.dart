@@ -5,12 +5,14 @@
 class ShopAccess {
   final DateTime trialEndsAt;
   final DateTime? subscriptionEndsAt;
+  final bool isLifetime;
   final DateTime _serverNow;
   final Stopwatch _sinceFetch = Stopwatch()..start();
 
   ShopAccess({
     required this.trialEndsAt,
     required this.subscriptionEndsAt,
+    this.isLifetime = false,
     required DateTime serverNow,
   }) : _serverNow = serverNow;
 
@@ -19,6 +21,7 @@ class ShopAccess {
     return ShopAccess(
       trialEndsAt: DateTime.parse(json['trial_ends_at'] as String),
       subscriptionEndsAt: sub == null ? null : DateTime.parse(sub),
+      isLifetime: json['is_lifetime'] as bool? ?? false,
       serverNow: DateTime.parse(json['server_now'] as String),
     );
   }
@@ -28,9 +31,10 @@ class ShopAccess {
   bool get hasSubscription =>
       subscriptionEndsAt != null && subscriptionEndsAt!.isAfter(now);
 
-  bool get onTrial => !hasSubscription && trialEndsAt.isAfter(now);
+  bool get onTrial =>
+      !isLifetime && !hasSubscription && trialEndsAt.isAfter(now);
 
-  bool get hasAccess => hasSubscription || onTrial;
+  bool get hasAccess => isLifetime || hasSubscription || onTrial;
 
   /// Whole days left in the trial (a partial day counts as a day).
   int get trialDaysLeft {

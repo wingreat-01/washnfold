@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../config.dart';
+import '../models/shop_access.dart';
 import '../models/staff.dart';
+import '../providers/billing_provider.dart';
 import '../providers/currency_settings.dart';
 import '../providers/service_catalog_provider.dart';
 import '../providers/theme_settings.dart';
@@ -107,6 +111,11 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 28),
+              if (_isOwner) ...[
+                const _SectionLabel('Plan'),
+                _PlanSection(shopId: shopId),
+                const SizedBox(height: 28),
+              ],
               const _SectionLabel('Appearance'),
               const Card(
                 margin: EdgeInsets.zero,
@@ -246,6 +255,238 @@ class _ThemePicker extends StatelessWidget {
               context.read<ThemeSettings>().setMode(selection.first),
         ),
       ),
+    );
+  }
+}
+
+/// The two plans: the free 30-day Trial Plan and the one-time Lifetime Plan.
+/// Buying is by email for now (no in-app payment yet); the shop is switched
+/// to lifetime on the server afterwards.
+class _PlanSection extends StatefulWidget {
+  final String shopId;
+  const _PlanSection({required this.shopId});
+
+  @override
+  State<_PlanSection> createState() => _PlanSectionState();
+}
+
+class _PlanSectionState extends State<_PlanSection> {
+  ShopAccess? _access;
+  bool _loading = true;
+  int _seenActivations = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _seenActivations = context.read<BillingProvider>().activations;
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final a = await SupabaseService.instance.fetchShopAccess();
+      if (mounted) setState(() => _access = a);
+    } catch (e) {
+      logDebug('load plan failed: $e');
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _getLifetime() async {
+    final billing = context.read<BillingProvider>();
+    if (billing.supported) {
+      await billing.buyLifetime(); // Google Play (Android)
+      return;
+    }
+    // Web: Google Play isn't available there, so fall back to email.
+    final subject = Uri.encodeComponent('Laundry Mate Lifetime Plan');
+    final body = Uri.encodeComponent(
+        'I would like the Lifetime Plan (₱${AppConfig.lifetimePricePhp}).\n\n'
+        'Shop ID: ${widget.shopId}');
+    await launchUrl(Uri.parse(
+        'mailto:${AppConfig.supportEmail}?subject=$subject&body=$body'));
+  }
+
+  Widget _chip(BuildContext context, String text, {bool good = true}) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: good ? scheme.primaryContainer : scheme.errorContainer,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+          color: good ? scheme.onPrimaryContainer : scheme.onErrorContainer,
+        ),
+      ),
+    );
+  }
+
+  Widget _point(BuildContext context, String text) => Padding(
+        padding: const EdgeInsets.only(top: 6),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.check_circle_rounded,
+                size: 18, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(width: 8),
+            Expanded(child: Text(text)),
+          ],
+        ),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final access = _access;
+    final primary = Theme.of(context).colorScheme.primary;
+    final billing = context.watch<BillingProvider>();
+    // A purchase was just verified: re-read the plan so this card updates.
+    if (billing.activations != _seenActivations) {
+      _seenActivations = billing.activations;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _load();
+      });
+    }
+
+    Widget? trialChip;
+    String trialNote = 'Free for 30 days, full features.';
+    if (access != null) {
+      if (access.isLifetime || access.hasSubscription) {
+        trialNote = 'Your trial is behind you.';
+      } else if (access.onTrial) {
+        final d = access.trialDaysLeft;
+        trialChip = _chip(context, 'Current plan');
+        trialNote = d <= 1 ? 'Last day of your trial.' : '$d days left.';
+      } else {
+        trialChip = _chip(context, 'Ended', good: false);
+        trialNote = 'Your 30-day trial has ended.';
+      }
+    }
+    final hasLifetime = access?.isLifetime ?? false;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Card(
+          margin: EdgeInsets.zero,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Expanded(
+                      child: Text('Trial Plan',
+                          style: TextStyle(
+                              fontSize: 17, fontWeight: FontWeight.w800)),
+                    ),
+                    if (_loading)
+                      const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2))
+                    else if (trialChip != null)
+                      trialChip,
+                  ],
+                ),
+                const SizedBox(height: 4),
+                const Text('Free', style: TextStyle(fontWeight: FontWeight.w700)),
+                const SizedBox(height: 4),
+                Text(trialNote),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Card(
+          margin: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: primary, width: 1.5),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Expanded(
+                      child: Text('Lifetime Plan',
+                          style: TextStyle(
+                              fontSize: 17, fontWeight: FontWeight.w800)),
+                    ),
+                    if (hasLifetime)
+                      _chip(context, 'Active')
+                    else
+                      _chip(context, 'Early launch promo'),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      billing.product?.price ?? '₱${AppConfig.lifetimePricePhp}',
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w900,
+                        color: primary,
+                      ),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 8, bottom: 5),
+                      child: Text('one-time'),
+                    ),
+                  ],
+                ),
+                _point(context, 'Pay once, use it for good'),
+                _point(context, 'No monthly fees'),
+                _point(context, 'Everything in the Trial Plan, with no 30-day limit'),
+                if (!hasLifetime) ...[
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: billing.purchasing ? null : _getLifetime,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: billing.purchasing
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Text('Get the Lifetime Plan'),
+                      ),
+                    ),
+                  ),
+                  if (billing.error != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      billing.error!,
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.error),
+                    ),
+                  ],
+                  if (billing.supported)
+                    TextButton(
+                      onPressed: billing.purchasing ? null : billing.restore,
+                      child: const Text('Restore purchase'),
+                    ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

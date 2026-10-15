@@ -1,7 +1,7 @@
 name: washnfold
 description: WashNFold — Laundry shop management system (order intake, queue, POS, owner dashboard).
 publish_to: 'none'
-version: 0.1.0
+version: 0.1.0+1
 
 environment:
   sdk: '>=3.3.0 <4.0.0'
@@ -25,6 +25,9 @@ dependencies:
   # State management
   provider: ^6.1.2
 
+  # Native "Continue with Google" on Android (ID token -> Supabase)
+  google_sign_in: ^7.1.0
+
   # Opens the privacy policy page in the browser
   url_launcher: ^6.3.0
 
@@ -38,6 +41,9 @@ dependencies:
 
   # Remembers the chime on/off choice on this device
   shared_preferences: ^2.3.0
+
+  # Google Play Billing for the one-time Lifetime Plan (Android)
+  in_app_purchase: ^3.3.1
 
 dev_dependencies:
   flutter_test:

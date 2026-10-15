@@ -33,7 +33,7 @@ android {
     defaultConfig {
         // PERMANENT once uploaded to Google Play. Change it only if you
         // want a different ID, and only before your first upload.
-        applicationId = "com.prohubapps.washnfold"
+        applicationId = "com.prohubapps.laundry"
         minSdk = flutter.minSdkVersion
         targetSdk = maxOf(flutter.targetSdkVersion, 36)
         // Taken from pubspec.yaml: version: 1.0.0+1  (the +1 is versionCode).

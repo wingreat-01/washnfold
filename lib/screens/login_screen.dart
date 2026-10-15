@@ -1,8 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'
-    show AuthChangeEvent, AuthException, AuthState;
+import 'package:google_sign_in/google_sign_in.dart'
+    show GoogleSignInException, GoogleSignInExceptionCode;
+import 'package:supabase_flutter/supabase_flutter.dart' show AuthException;
 
 import '../services/supabase_service.dart';
 import '../widgets/privacy_policy_link.dart';
@@ -31,38 +30,30 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _error;
   String? _info;
 
-  // Google sign-in on Android finishes in the background (browser → deep
-  // link), so wait for the auth event instead of an awaited call.
-  bool _awaitingGoogle = false;
-  StreamSubscription<AuthState>? _authSub;
-
-  @override
-  void initState() {
-    super.initState();
-    _authSub =
-        SupabaseService.instance.client.auth.onAuthStateChange.listen((data) {
-      if (data.event == AuthChangeEvent.signedIn && _awaitingGoogle && mounted) {
-        _awaitingGoogle = false;
-        widget.onSignedIn();
-      }
-    });
-  }
-
   Future<void> _google() async {
     setState(() {
       _loading = true;
       _error = null;
       _info = null;
-      _awaitingGoogle = true;
     });
     try {
       await SupabaseService.instance.signInWithGoogle();
+      // Android: the session is ready now. Web: the page redirects to Google
+      // and the app restarts signed in, so this is never reached there.
+      if (mounted && SupabaseService.instance.isSignedIn) {
+        widget.onSignedIn();
+      }
+    } on GoogleSignInException catch (e) {
+      logDebug('google sign-in failed: $e');
+      // Closing the account picker is not an error worth showing.
+      if (e.code != GoogleSignInExceptionCode.canceled && mounted) {
+        setState(() => _error = 'Google sign-in failed. Please try again.');
+      }
     } catch (e) {
       logDebug('google sign-in failed: $e');
-      _awaitingGoogle = false;
       if (mounted) {
         setState(() =>
-            _error = 'Could not start Google sign-in. Please try again.');
+            _error = 'Could not sign in with Google. Please try again.');
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -188,22 +179,32 @@ class _LoginScreenState extends State<LoginScreen> {
 
   String _signUpMessage(AuthException e) {
     final m = e.message.toLowerCase();
-    if (m.contains('already registered') || m.contains('already been registered')) {
+    // Supabase sometimes puts a raw JSON blob in the message; never show that.
+    final readable = e.message.trimLeft().startsWith('{') ? null : e.message;
+    const generic = 'Could not create the account. Please try again.';
+
+    if (m.contains('sending confirmation email') ||
+        m.contains('error sending')) {
+      return "We couldn't send your confirmation email right now. "
+          'Please try again in a few minutes.';
+    }
+    if (m.contains('already registered') ||
+        m.contains('already been registered')) {
       return 'That email already has an account. Try signing in instead.';
     }
     if (m.contains('rate limit') || e.statusCode == '429') {
-      return 'Too many sign-up emails were sent. Please wait a few minutes and try again.';
+      return 'Too many sign-up emails were sent. Please wait a few minutes '
+          'and try again.';
     }
-    if (m.contains('password')) return e.message;
     if (m.contains('signups not allowed') || m.contains('signup is disabled')) {
       return 'New sign-ups are turned off right now.';
     }
-    return e.message;
+    if (m.contains('password')) return readable ?? generic;
+    return readable ?? generic;
   }
 
   @override
   void dispose() {
-    _authSub?.cancel();
     _shopController.dispose();
     _nameController.dispose();
     _emailController.dispose();
