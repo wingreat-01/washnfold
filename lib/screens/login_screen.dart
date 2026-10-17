@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' show AuthException;
 
 import '../services/supabase_service.dart';
 import '../widgets/privacy_policy_link.dart';
+import '../widgets/wordmark.dart';
 import '../utils/app_errors.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -242,21 +243,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Image.asset(
-                  'assets/icon/wordmark.png',
-                  height: 46,
-                  fit: BoxFit.contain,
-                  semanticLabel: 'Laundry Mate',
-                  // Falls back to plain text if the image is missing.
-                  errorBuilder: (_, __, ___) => Text(
-                    'Laundry Mate',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineMedium
-                        ?.copyWith(fontWeight: FontWeight.w700),
-                  ),
-                ),
+                const Wordmark(height: 46),
                 const SizedBox(height: 8),
                 Text(
                   _createMode ? 'Create your owner account' : 'Welcome back',

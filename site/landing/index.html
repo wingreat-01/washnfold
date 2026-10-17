@@ -22,14 +22,14 @@
   --strong:#123047; --body:#25364A; --muted:#5F6F84; --accent:#2677C9; --on-accent:#FFFFFF;
   --tint-blue:#E8F1FC; --tint-green:#E5F4EC; --tint-purple:#F1EAFE; --tint-amber:#FFF1DA;
   --c-received:#64748B; --c-washing:#2677C9; --c-drying:#D97706; --c-folding:#805AD5; --c-ready:#16845B; --unpaid:#D32F2F;
-  --shadow:0 10px 30px #12304712; --logo-filter:none; color-scheme:light;
+  --shadow:0 10px 30px #12304712; --logo-filter:none; --wordmark-filter:none; color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root{
   --canvas:#0E1621; --surface:#16212E; --alt:#1B2838; --border:#263647; --border2:#32465A;
   --strong:#E8EEF5; --body:#C9D4E0; --muted:#9AA9BA; --accent:#5AA2E8; --on-accent:#06223D;
   --tint-blue:#15304A; --tint-green:#15372A; --tint-purple:#2A2142; --tint-amber:#3A2C12;
   --c-received:#94A3B8; --c-washing:#5AA2E8; --c-drying:#F59E0B; --c-folding:#B794F4; --c-ready:#34D399; --unpaid:#F87171;
-  --shadow:none; --logo-filter:brightness(1.18) saturate(1.05); color-scheme:dark;
+  --shadow:none; --logo-filter:brightness(1.18) saturate(1.05); --wordmark-filter:brightness(1.18) saturate(1.05) drop-shadow(0 0 4px rgb(120 190 255 / .45)) drop-shadow(0 0 12px rgb(90 162 232 / .35)); color-scheme:dark;
 }}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -40,6 +40,8 @@ a{color:var(--accent)}
 .wrap{width:100%;max-width:1120px;margin:0 auto;padding:0 20px}
 .hidden{display:none!important}
 .brand-img{filter:var(--logo-filter);display:block}
+/* Soft light glow behind the wordmark on dark backgrounds only */
+.wordmark.brand-img{filter:var(--wordmark-filter)}
 :focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 55%,transparent);outline-offset:2px;border-radius:8px}
 
 /* buttons */
