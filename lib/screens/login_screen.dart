@@ -44,16 +44,22 @@ class _LoginScreenState extends State<LoginScreen> {
         widget.onSignedIn();
       }
     } on GoogleSignInException catch (e) {
-      logDebug('google sign-in failed: $e');
-      // Closing the account picker is not an error worth showing.
-      if (e.code != GoogleSignInExceptionCode.canceled && mounted) {
-        setState(() => _error = 'Google sign-in failed. Please try again.');
+      logDebug('google sign-in failed: ${e.code} ${e.description}');
+      // TEMP DEBUG: show the real reason on screen, including "canceled"
+      // (a wrong SHA-1 / package name / client ID often shows up as
+      // "canceled"). Restore the commented block below once it works.
+      if (mounted) {
+        setState(() => _error = 'Google: ${e.code.name} - ${e.description}');
       }
+      // Closing the account picker is not an error worth showing:
+      // if (e.code != GoogleSignInExceptionCode.canceled && mounted) {
+      //   setState(() => _error = 'Google sign-in failed. Please try again.');
+      // }
     } catch (e) {
       logDebug('google sign-in failed: $e');
       if (mounted) {
-        setState(() =>
-            _error = 'Could not sign in with Google. Please try again.');
+        // TEMP DEBUG: show the real error (e.g. a Supabase auth message).
+        setState(() => _error = 'Google error: $e');
       }
     } finally {
       if (mounted) setState(() => _loading = false);

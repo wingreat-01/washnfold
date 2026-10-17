@@ -52,9 +52,17 @@ class DryerProvider extends ChangeNotifier {
         .from('dryers')
         .stream(primaryKey: ['id'])
         .eq('shop_id', shopId)
-        .listen((rows) {
-      _dryers = _sorted(rows.map(Dryer.fromJson).toList());
-      notifyListeners();
+        .listen((_) async {
+      // Supabase Realtime never sends DELETE events for a filtered stream,
+      // so the stream's own row list goes stale and still contains deleted
+      // machines (they "come back" on the next insert/update). Use the
+      // stream only as a "something changed" signal and re-read the table.
+      try {
+        await _reload();
+        notifyListeners();
+      } catch (e) {
+        logDebug('dryer refresh failed: $e');
+      }
     }, onError: (e) => logDebug('dryer stream error: $e'));
   }
 
@@ -127,6 +135,11 @@ class DryerProvider extends ChangeNotifier {
   Future<void> deleteDryer(String id) async {
     await _supabase.client.from('dryers').delete().eq('id', id);
     await _reload();
+    // A blocked delete (e.g. no DELETE policy) removes nothing and raises no
+    // error, so check the machine is really gone instead of assuming.
+    if (_dryers.any((d) => d.id == id)) {
+      throw StateError('Could not delete this dryer.');
+    }
     notifyListeners();
   }
 

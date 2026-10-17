@@ -110,9 +110,17 @@ class WasherProvider extends ChangeNotifier {
         .from('washers')
         .stream(primaryKey: ['id'])
         .eq('shop_id', shopId)
-        .listen((rows) {
-      _applyWashers(_sorted(rows.map(Washer.fromJson).toList()));
-      notifyListeners();
+        .listen((_) async {
+      // Supabase Realtime never sends DELETE events for a filtered stream,
+      // so the stream's own row list goes stale and still contains deleted
+      // machines (they "come back" on the next insert/update). Use the
+      // stream only as a "something changed" signal and re-read the table.
+      try {
+        await _reload();
+        notifyListeners();
+      } catch (e) {
+        logDebug('washer refresh failed: $e');
+      }
     }, onError: (e) => logDebug('washer stream error: $e'));
   }
 
@@ -185,6 +193,11 @@ class WasherProvider extends ChangeNotifier {
   Future<void> deleteWasher(String id) async {
     await _supabase.client.from('washers').delete().eq('id', id);
     await _reload();
+    // A blocked delete (e.g. no DELETE policy) removes nothing and raises no
+    // error, so check the machine is really gone instead of assuming.
+    if (_washers.any((w) => w.id == id)) {
+      throw StateError('Could not delete this washer.');
+    }
     notifyListeners();
   }
 
