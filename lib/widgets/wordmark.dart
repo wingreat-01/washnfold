@@ -39,10 +39,10 @@ class Wordmark extends StatelessWidget {
         // Glow: tinted silhouette of the wordmark, blurred.
         ExcludeSemantics(
           child: ImageFiltered(
-            imageFilter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
+            imageFilter: ImageFilter.blur(sigmaX: 2.5, sigmaY: 2.5),
             child: ColorFiltered(
               colorFilter:
-                  const ColorFilter.mode(Color(0x6678BEFF), BlendMode.srcIn),
+                  const ColorFilter.mode(Color(0x4078BEFF), BlendMode.srcIn),
               child: Image.asset(
                 _asset,
                 height: height,
