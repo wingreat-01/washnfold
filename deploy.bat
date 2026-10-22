@@ -2,7 +2,7 @@
 cd /d "%~dp0"
 
 echo === Building Flutter web ===
-call flutter build web
+call flutter build web --release --base-href /app/
 if errorlevel 1 goto failed
 
 echo === Copying build to site\app ===

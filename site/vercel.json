@@ -1,9 +1,9 @@
 {
   "redirects": [
     {
-      "source": "/",
-      "destination": "/landing/",
-      "permanent": false
+      "source": "/landing/:path*",
+      "destination": "/",
+      "permanent": true
     }
   ],
   "rewrites": [
