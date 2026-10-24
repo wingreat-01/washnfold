@@ -5,6 +5,11 @@ import 'package:provider/provider.dart';
 import '../providers/dashboard_provider.dart';
 import '../theme/app_theme.dart';
 import '../providers/currency_settings.dart';
+import '../providers/service_catalog_provider.dart';
+import '../providers/washer_provider.dart';
+import '../providers/dryer_provider.dart';
+import '../providers/order_provider.dart';
+import '../widgets/laundrymate_onboarding.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -25,6 +30,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final dashboard = context.watch<DashboardProvider>();
+    final services = context.watch<ServiceCatalogProvider>();
+    final washers = context.watch<WasherProvider>();
+    final dryers = context.watch<DryerProvider>();
+    final orders = context.watch<OrderProvider>();
     final currency = context.watch<CurrencySettings>().format(decimals: 0);
 
     if (dashboard.loading && dashboard.todayRevenue == 0) {
@@ -113,6 +122,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
               _MetricCard(label: 'This month', value: currency.format(dashboard.monthRevenue), icon: Icons.calendar_month_rounded, tint: context.palette.tintPurple, accent: const Color(0xFF805AD5), width: cardWidth),
               _MetricCard(label: 'Active orders', value: '${dashboard.activeOrderCount}', icon: Icons.local_laundry_service_rounded, tint: context.palette.tintAmber, accent: const Color(0xFFD97706), width: cardWidth),
             ]),
+            if (services.services.isEmpty || washers.washers.isEmpty || dryers.dryers.isEmpty || orders.orders.isEmpty) ...[
+              const SizedBox(height: 22),
+              _SetupChecklist(
+                hasServices: services.services.isNotEmpty,
+                hasWashers: washers.washers.isNotEmpty,
+                hasDryers: dryers.dryers.isNotEmpty,
+                hasOrders: orders.orders.isNotEmpty,
+                onHelp: () => LaundryMateOnboarding.show(
+                  context,
+                  shopId: services.shopId,
+                  canViewReports: true,
+                ),
+              ),
+            ],
             const SizedBox(height: 28),
             Row(children: [
               Container(width: 4, height: 22, decoration: BoxDecoration(color: context.palette.teal, borderRadius: BorderRadius.circular(4))),
@@ -188,4 +211,71 @@ class _EmptyServices extends StatelessWidget {
       Text('Your most popular services will appear here.', textAlign: TextAlign.center, style: TextStyle(color: context.palette.muted)),
     ]),
   );
+}
+
+
+class _SetupChecklist extends StatelessWidget {
+  final bool hasServices;
+  final bool hasWashers;
+  final bool hasDryers;
+  final bool hasOrders;
+  final VoidCallback onHelp;
+
+  const _SetupChecklist({
+    required this.hasServices,
+    required this.hasWashers,
+    required this.hasDryers,
+    required this.hasOrders,
+    required this.onHelp,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final items = <(String, bool, IconData)>[
+      ('Add your laundry services', hasServices, Icons.design_services_outlined),
+      ('Register your washers', hasWashers, Icons.local_laundry_service_outlined),
+      ('Register your dryers', hasDryers, Icons.dry_cleaning_outlined),
+      ('Create your first order', hasOrders, Icons.add_shopping_cart_outlined),
+    ];
+    final done = items.where((item) => item.$2).length;
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Icon(Icons.checklist_rounded, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(width: 10),
+            Expanded(child: Text('Get your shop ready', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800))),
+            Text('$done/${items.length}', style: Theme.of(context).textTheme.labelLarge),
+          ]),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: LinearProgressIndicator(value: done / items.length, minHeight: 5),
+          ),
+          const SizedBox(height: 8),
+          ...items.map((item) => ListTile(
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(item.$2 ? Icons.check_circle_rounded : item.$3,
+                color: item.$2 ? const Color(0xFF16845B) : Theme.of(context).colorScheme.onSurfaceVariant),
+            title: Text(item.$1, style: TextStyle(
+              decoration: item.$2 ? TextDecoration.lineThrough : null,
+              color: item.$2 ? Theme.of(context).colorScheme.onSurfaceVariant : null,
+            )),
+            trailing: item.$2 ? const Text('Done') : null,
+          )),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: onHelp,
+              icon: const Icon(Icons.help_outline_rounded),
+              label: const Text('Open tutorial'),
+            ),
+          ),
+        ]),
+      ),
+    );
+  }
 }

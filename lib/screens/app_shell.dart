@@ -17,6 +17,7 @@ import '../widgets/machine_alert_host.dart';
 import '../widgets/tile_columns_menu.dart';
 import '../widgets/shop_qr_dialog.dart';
 import '../widgets/washer_free_prompt.dart';
+import '../widgets/laundrymate_onboarding.dart';
 import 'dashboard_screen.dart';
 import 'dryer_screen.dart';
 import 'my_sales_screen.dart';
@@ -46,6 +47,27 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   int _index = 0;
+  bool _onboardingCheckStarted = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_onboardingCheckStarted) return;
+    _onboardingCheckStarted = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final seen = await LaundryMateOnboarding.hasSeen(
+        widget.shopId, widget.role.canViewReports);
+      if (!mounted || seen) return;
+      await LaundryMateOnboarding.show(
+        context, shopId: widget.shopId, canViewReports: widget.role.canViewReports);
+    });
+  }
+
+  Future<void> _openHelp(BuildContext context) async {
+    await LaundryMateOnboarding.show(
+        context, shopId: widget.shopId, canViewReports: widget.role.canViewReports);
+  }
 
   List<_Tab> _tabsFor(StaffRole role) => [
         const _Tab(Icons.add_circle_outline_rounded, Icons.add_circle_rounded, 'New order', OrderIntakeScreen()),
@@ -151,6 +173,11 @@ class _AppShellState extends State<AppShell> {
                             children: [
                               const SoundToggleButton(),
                               IconButton(
+                                icon: const Icon(Icons.help_outline_rounded),
+                                tooltip: 'Help & Tutorial',
+                                onPressed: () => _openHelp(context),
+                              ),
+                              IconButton(
                                 icon: const Icon(Icons.settings_outlined),
                                 tooltip: 'Settings',
                                 onPressed: () => _openSettings(context),
@@ -219,6 +246,11 @@ class _AppShellState extends State<AppShell> {
                           ),
                         ),
                       const SoundToggleButton(),
+                      IconButton(
+                        tooltip: 'Help & Tutorial',
+                        icon: const Icon(Icons.help_outline_rounded),
+                        onPressed: () => _openHelp(context),
+                      ),
                       IconButton(
                         tooltip: 'Settings',
                         icon: const Icon(Icons.settings_outlined),

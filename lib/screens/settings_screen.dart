@@ -15,6 +15,7 @@ import 'services_screen.dart';
 import 'staff_screen.dart';
 import '../widgets/privacy_policy_link.dart';
 import '../utils/app_errors.dart';
+import '../widgets/laundrymate_onboarding.dart';
 
 /// Account settings: who you're signed in as, sign out, and permanent
 /// account deletion (required by Google Play for apps with accounts).
@@ -157,6 +158,18 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ),
               ],
+              const SizedBox(height: 28),
+              const _SectionLabel('Help'),
+              Card(
+                margin: EdgeInsets.zero,
+                child: ListTile(
+                  leading: const Icon(Icons.help_outline_rounded),
+                  title: const Text('Help & Tutorial'),
+                  subtitle: const Text('Learn how to set up and use LaundryMate'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => LaundryMateOnboarding.show(context, shopId: shopId, canViewReports: role.canViewReports),
+                ),
+              ),
               const SizedBox(height: 28),
               const _SectionLabel('About'),
               Card(
