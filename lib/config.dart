@@ -18,7 +18,7 @@ class AppConfig {
   static const supportEmail = 'laundrymate@prohubapps.com';
 
   /// Lifetime Plan: one-time price in pesos (early launch promo).
-  static const lifetimePricePhp = 790;
+  static const lifetimePricePhp = 267;
 
   /// The public URL this web app is deployed at, used to build the
   /// customer-facing tracking links encoded in each order's QR code.

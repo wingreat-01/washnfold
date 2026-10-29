@@ -116892,7 +116892,7 @@ for(;;)switch(s){case 0:p=q.c
 p.toString
 A.aH(p,!1,t.Tu)
 s=2
-return A.h(A.QC(A.cI(u.Y+A.lz(2,"Laundry Mate Lifetime Plan",B.Y,!1)+"&body="+A.lz(2,"I would like the Lifetime Plan (\u20b1790).\n\nShop ID: "+q.a.c,B.Y,!1),0,null),B.nT,null),$async$DD)
+return A.h(A.QC(A.cI(u.Y+A.lz(2,"Laundry Mate Lifetime Plan",B.Y,!1)+"&body="+A.lz(2,"I would like the Lifetime Plan (\u20b1267).\n\nShop ID: "+q.a.c,B.Y,!1),0,null),B.nT,null),$async$DD)
 case 2:return A.n(null,r)}})
 return A.o($async$DD,r)},
 WY(a,b,c){var s,r,q,p=null,o=A.v(a).ax
@@ -116928,7 +116928,7 @@ else m.push(j.L8(a,"Early launch promo"))
 m=A.b5(m,B.n,B.h,B.k,0,i)
 l=f.b
 l=l==null?i:l.d
-if(l==null)l="\u20b1790"
+if(l==null)l="\u20b1267"
 l=A.b([m,B.c0,A.b5(A.b([A.H(l,i,i,i,A.aR(i,i,g,i,i,i,i,i,i,i,i,30,i,i,B.jR,i,i,!0,i,i,i,i,i,i,i,i),i,i,i),B.a_Z],e),B.dq,B.h,B.k,0,i),j.Nx(a,"Pay once, use it for good"),j.Nx(a,"No monthly fees"),j.Nx(a,"Everything in the Trial Plan, with no 30-day limit")],e)
 if(!p){m=f.d
 k=m?i:j.ganE()
@@ -117271,15 +117271,15 @@ return A.o($async$F5,r)},
 Db(){var s=0,r=A.p(t.H)
 var $async$Db=A.q(function(a,b){if(a===1)return A.m(b,r)
 for(;;)switch(s){case 0:s=2
-return A.h(A.QC(A.cI(u.Y+A.lz(2,"Laundry Mate Lifetime Plan",B.Y,!1)+"&body="+A.lz(2,"I would like the Lifetime Plan (\u20b1790).",B.Y,!1),0,null),B.nT,null),$async$Db)
+return A.h(A.QC(A.cI(u.Y+A.lz(2,"Laundry Mate Lifetime Plan",B.Y,!1)+"&body="+A.lz(2,"I would like the Lifetime Plan (\u20b1267).",B.Y,!1),0,null),B.nT,null),$async$Db)
 case 2:return A.n(null,r)}})
 return A.o($async$Db,r)},
 F(a){var s,r,q,p=null,o=A.aH(a,!0,t.Tu),n=o.b,m=n==null?p:n.d
-if(m==null)m="\u20b1790"
+if(m==null)m="\u20b1267"
 n=A.H("Your free trial has ended",p,p,p,A.v(a).ok.r,B.a0,p,p)
 s=this.c
 r=t.p
-n=A.b([B.Pw,B.U,n,B.ab,A.H(s?"Your 30 days are up. Get the Lifetime Plan for a one-time \u20b1790 (early launch promo) to keep taking orders. Your shop and order history are safe and will be there when you do.":"The shop's free trial is over. Ask the shop owner to subscribe, then tap Check again.",p,p,p,p,B.a0,p,p),B.fP],r)
+n=A.b([B.Pw,B.U,n,B.ab,A.H(s?"Your 30 days are up. Get the Lifetime Plan for a one-time \u20b1267 (early launch promo) to keep taking orders. Your shop and order history are safe and will be there when you do.":"The shop's free trial is over. Ask the shop owner to subscribe, then tap Check again.",p,p,p,p,B.a0,p,p),B.fP],r)
 if(s){s=o.d
 q=s?p:new A.aB3(this,a)
 q=A.b([A.eb(new A.a9(B.dt,s?B.cL:A.H("Get the Lifetime Plan \xb7 "+m,p,p,p,p,p,p,p),p),q,p)],r)
